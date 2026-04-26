@@ -115,6 +115,7 @@ function App() {
   const [draftImages, setDraftImages] = useState<string[]>(mockUploadImages.slice(0, 2))
   const [editingPostId, setEditingPostId] = useState<string | null>(null)
   const [likedPostIds, setLikedPostIds] = useState<string[]>([])
+  const [albumFilterPetId, setAlbumFilterPetId] = useState<string>('all')
   const [aiBackTarget, setAiBackTarget] = useState<ScreenKey>('home')
 
   const selectedPet = useMemo(() => pets.find((pet) => pet.id === selectedPetId) ?? pets[0], [selectedPetId, dataVersion])
@@ -331,6 +332,7 @@ function App() {
                   onOpenPlan={() => navigateTo('plan')}
                   onOpenDiscussion={() => goTab('discussion')}
                   onOpenShop={() => goTab('shop')}
+                  onOpenAlbum={() => { setAlbumFilterPetId('all'); navigateTo('album') }}
                   onOpenCalendar={() => navigateTo('calendar')}
                   onOpenArticle={(id) => {
                     setSelectedPostId(id)
@@ -352,10 +354,7 @@ function App() {
                   onOpenPets={() => navigateTo('pets')}
                   onOpenRecord={() => navigateTo('record')}
                   onOpenPlan={() => navigateTo('plan')}
-                  onOpenProfile={(id) => {
-                    setSelectedPetId(id)
-                    navigateTo('profile')
-                  }}
+                  onOpenAlbum={() => { setAlbumFilterPetId('all'); navigateTo('album') }}
                 />
               )}
 
@@ -368,7 +367,7 @@ function App() {
 
               {screen === 'addPet' && <AddPetScreen onBack={() => goBack()} onSave={savePet} />}
               {screen === 'editPet' && <AddPetScreen onBack={() => goBack()} onSave={updatePet} initialPet={selectedPet} mode="edit" />}
-              {screen === 'profile' && <PetProfileScreen pet={selectedPet} onBack={() => goBack()} onEdit={() => navigateTo('editPet')} onOpenRecord={() => navigateTo('record')} onOpenPlan={() => navigateTo('plan')} onOpenAI={() => openAI('profile')} onOpenAlbum={() => navigateTo('album')} onOpenHistory={() => navigateTo('history')} />}
+              {screen === 'profile' && <PetProfileScreen pet={selectedPet} onBack={() => goBack()} onEdit={() => navigateTo('editPet')} onOpenRecord={() => navigateTo('record')} onOpenPlan={() => navigateTo('plan')} onOpenAI={() => openAI('profile')} onOpenAlbum={() => { setAlbumFilterPetId(selectedPet.id); navigateTo('album') }} onOpenHistory={() => navigateTo('history')} />}
               {screen === 'record' && <RecordScreen onBack={() => goBack()} onSubmitRecord={saveRecord} />}
               {screen === 'plan' && <PlanScreen onBack={() => goBack()} onOpenProfile={openProfile} onCreatePlan={createPlan} onUpdatePlan={updatePlan} onOpenCalendar={() => navigateTo('calendar')} />}
               {screen === 'calendar' && <CalendarScreen selectedDate={selectedDate} onSelectDate={setSelectedDate} onBack={() => goBack()} onOpenProfile={openProfile} onOpenRecord={() => navigateTo('record')} />}
@@ -417,7 +416,7 @@ function App() {
               {screen === 'member' && <MemberScreen isLoggedIn={isLoggedIn} onOpenLogin={() => navigateTo('login')} />}
               {screen === 'login' && <LoginScreen onBack={() => goBack()} onLogin={() => { setIsLoggedIn(true); goBack('member') }} />}
               {screen === 'ai' && <AIScreen selectedPetId={selectedPetId} onChangePet={setSelectedPetId} onBack={() => goBack(aiBackTarget)} />}
-              {screen === 'album' && <AlbumScreen pet={selectedPet} onBack={() => goBack()} />}
+              {screen === 'album' && <AlbumScreen selectedPetId={albumFilterPetId} onSelectPet={setAlbumFilterPetId} onBack={() => goBack()} />}
               {screen === 'history' && <HistoryScreen pet={selectedPet} onBack={() => goBack()} />}
               {screen === 'construction' && <ConstructionScreen onBack={() => goBack()} />}
             </div>
@@ -485,6 +484,7 @@ function HomeScreen({
   onOpenPlan,
   onOpenDiscussion,
   onOpenShop,
+  onOpenAlbum,
   onOpenCalendar,
   onOpenArticle,
   onOpenProduct,
@@ -498,6 +498,7 @@ function HomeScreen({
   onOpenPlan: () => void
   onOpenDiscussion: () => void
   onOpenShop: () => void
+  onOpenAlbum: () => void
   onOpenCalendar: () => void
   onOpenArticle: (id: string) => void
   onOpenProduct: (id: string) => void
@@ -514,7 +515,7 @@ function HomeScreen({
   const secondRow = [
     { label: '餵食計畫', action: onOpenPlan },
     { label: '繁孕紀錄', action: onOpenConstruction },
-    { label: '爬寵相簿', action: onOpenPets },
+    { label: '爬寵相簿', action: onOpenAlbum },
   ]
 
   return (
@@ -609,7 +610,7 @@ function HomeScreen({
   )
 }
 
-function PetHubScreen({ onOpenPets, onOpenRecord, onOpenPlan, onOpenProfile }: { onOpenPets: () => void; onOpenRecord: () => void; onOpenPlan: () => void; onOpenProfile: (id: string) => void }) {
+function PetHubScreen({ onOpenPets, onOpenRecord, onOpenPlan, onOpenAlbum }: { onOpenPets: () => void; onOpenRecord: () => void; onOpenPlan: () => void; onOpenAlbum: () => void }) {
   return (
     <div className="space-y-4 pb-8">
       <SectionHeader eyebrow="爬寵" title="第一期核心集合頁" />
@@ -617,7 +618,7 @@ function PetHubScreen({ onOpenPets, onOpenRecord, onOpenPlan, onOpenProfile }: {
         <HubCard title="我的爬寵" desc="每一隻寵物的個體檔案與列表" onClick={onOpenPets} />
         <HubCard title="餵食／紀錄" desc="高頻紀錄入口，先選寵物再切表單" onClick={onOpenRecord} />
         <HubCard title="餵食計畫" desc="建立固定照護排程與提醒" onClick={onOpenPlan} />
-        <HubCard title="爬寵相簿" desc="照片附著在個體頁與紀錄中" onClick={() => onOpenProfile(pets[0].id)} />
+        <HubCard title="爬寵相簿" desc="照片附著在個體頁與紀錄中" onClick={onOpenAlbum} />
       </div>
     </div>
   )
@@ -745,28 +746,43 @@ function PetProfileScreen({ pet, onBack, onEdit, onOpenRecord, onOpenPlan, onOpe
   )
 }
 
-function AlbumScreen({ pet, onBack }: { pet: PetProfile; onBack: () => void }) {
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
+function AlbumScreen({ selectedPetId, onSelectPet, onBack }: { selectedPetId: string; onSelectPet: (id: string) => void; onBack: () => void }) {
+  const [selectedPhoto, setSelectedPhoto] = useState<{ src: string; petId: string } | null>(null)
+  const photoItems = pets.flatMap((pet) => pet.photos.map((photo, index) => ({ src: photo, petId: pet.id, petName: pet.name, key: `${pet.id}-${index}` })))
+  const filteredPhotos = selectedPetId === 'all' ? photoItems : photoItems.filter((item) => item.petId === selectedPetId)
 
   return (
     <SwipeBackPage onBack={onBack}>
       <div className="space-y-4 pb-8">
         <SubPageHeader title="爬寵相簿" onBack={onBack} />
+        <section className="rounded-[28px] border border-orange-100 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold text-stone-500">右上篩選</p>
+          <select value={selectedPetId} onChange={(event) => onSelectPet(event.target.value)} className="mt-2 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none">
+            <option value="all">全部爬寵</option>
+            {pets.map((pet) => <option key={pet.id} value={pet.id}>{pet.name} · {pet.species}</option>)}
+          </select>
+        </section>
         <section className="grid grid-cols-3 gap-2">
-          {pet.photos.map((photo, index) => (
-            <button key={`${photo}-${index}`} onClick={() => setSelectedPhoto(photo)}>
-              <MediaThumb src={photo} alt={`${pet.name} ${index + 1}`} className="h-24 w-full rounded-2xl object-cover" fallbackClassName="flex items-center justify-center bg-orange-50" fallbackTextClassName="text-3xl" />
+          {filteredPhotos.map((photo) => (
+            <button key={photo.key} onClick={() => setSelectedPhoto({ src: photo.src, petId: photo.petId })}>
+              <MediaThumb src={photo.src} alt={photo.petName} className="h-24 w-full rounded-2xl object-cover" fallbackClassName="flex items-center justify-center bg-orange-50" fallbackTextClassName="text-3xl" />
             </button>
           ))}
         </section>
         {selectedPhoto && <section className="rounded-[28px] border border-orange-100 bg-white p-4 shadow-sm">
-          <MediaThumb src={selectedPhoto} alt={pet.name} className="h-64 w-full rounded-2xl object-cover" fallbackClassName="flex items-center justify-center bg-stone-50" fallbackTextClassName="text-4xl" />
+          <MediaThumb src={selectedPhoto.src} alt={petById(selectedPhoto.petId)?.name ?? 'photo'} className="h-64 w-full rounded-2xl object-cover" fallbackClassName="flex items-center justify-center bg-stone-50" fallbackTextClassName="text-4xl" />
+          <div className="mt-3 rounded-2xl bg-stone-50 px-4 py-4">
+            <p className="text-xs font-semibold text-stone-500">照片標記</p>
+            <select value={selectedPhoto.petId} onChange={(event) => setSelectedPhoto((current) => current ? { ...current, petId: event.target.value } : current)} className="mt-2 w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm outline-none">
+              {pets.map((pet) => <option key={pet.id} value={pet.id}>{pet.name} · {pet.species}</option>)}
+            </select>
+          </div>
           <div className="mt-3 flex gap-2">
             <Button variant="secondary" className="flex-1 rounded-full">下載</Button>
             <Button variant="secondary" className="flex-1 rounded-full" onClick={() => setSelectedPhoto(null)}>關閉放大</Button>
           </div>
         </section>}
-        <FloatingActionButton label="上傳" icon={<CirclePlus className="size-4" />} onClick={() => window.alert('開啟上傳')} />
+        <FloatingActionButton label="上傳" icon={<CirclePlus className="size-4" />} onClick={() => window.alert(selectedPetId === 'all' ? '開啟上傳，之後可手動標記爬寵' : `開啟上傳，預設標記為 ${petById(selectedPetId)?.name ?? '該爬寵'}`)} />
       </div>
     </SwipeBackPage>
   )
@@ -819,7 +835,7 @@ function RecordScreen({ onBack, onSubmitRecord }: { onBack: () => void; onSubmit
   const [otherFeed, setOtherFeed] = useState('')
   const [otherEvent, setOtherEvent] = useState('')
   const [otherStool, setOtherStool] = useState('')
-  const petPresetMap: Record<string, RecordPresetKey> = { cream: 'snake', ada: 'tortoise', gecko: 'gecko' }
+  const petPresetMap: Record<string, RecordPresetKey> = { cream: 'snake', ada: 'tortoise', gecko: 'gecko', froggy: 'amphibian', spider: 'arthropod' }
   const speciesPreset = petPresetMap[selectedPetId] ?? 'snake'
   const preset = recordPresets[speciesPreset]
   const speciesLabel = speciesPreset === 'snake' ? '蛇' : speciesPreset === 'tortoise' ? '陸龜' : speciesPreset === 'gecko' ? '守宮' : preset.label
