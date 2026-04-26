@@ -99,6 +99,19 @@ function refreshPetAiLine(pet: PetProfile) {
     : `最新狀態是「${pet.latestEvent}」，目前沒有新的待辦壓在後面，可以先觀察。`
 }
 
+function addPhotoToPet(petId: string, photo: string) {
+  const pet = petById(petId)
+  if (!pet) return
+  pet.photos = [photo, ...pet.photos.filter((item) => item !== photo)]
+}
+
+function movePhotoToPet(photo: string, nextPetId: string) {
+  pets.forEach((pet) => {
+    pet.photos = pet.photos.filter((item) => item !== photo)
+  })
+  addPhotoToPet(nextPetId, photo)
+}
+
 function App() {
   const [screen, setScreen] = useState<ScreenKey>('home')
   const [, setBackStack] = useState<ScreenKey[]>([])
@@ -186,6 +199,7 @@ function App() {
     target.records.unshift(record)
     target.timeline.unshift({ date: record.date.replaceAll('/', '-').slice(5), title: record.type, detail: record.detail })
     target.latestEvent = `${record.type} · ${record.detail}`
+    if (record.withPhoto) addPhotoToPet(petId, mockUploadImages[(target.photos.length + 1) % mockUploadImages.length])
     if (record.type === '餵食') target.latestFeedDate = record.date
     const linkedPlan = calendarEvents.find((event) => event.petId === petId && !event.done && (event.type === 'feeding' || event.type === 'soak' || event.type === 'observe'))
     if (linkedPlan) linkedPlan.done = true
@@ -232,6 +246,16 @@ function App() {
     refreshPetAiLine(pet)
     setDataVersion((value) => value + 1)
     window.alert('計畫已更新')
+  }
+
+  const attachPhotoToPet = (petId: string, source: 'upload' | 'camera' | 'album') => {
+    const pet = petById(petId)
+    if (!pet) return
+    const pool = source === 'album' ? [...pet.photos, ...mockUploadImages] : mockUploadImages
+    const nextPhoto = pool.find((item) => !pet.photos.includes(item)) ?? pool[0]
+    addPhotoToPet(petId, nextPhoto)
+    setDataVersion((value) => value + 1)
+    window.alert(`已新增照片到 ${pet.name} 的爬寵相簿`)
   }
 
   const likePost = (postId: string) => {
@@ -365,8 +389,8 @@ function App() {
                 />
               )}
 
-              {screen === 'addPet' && <AddPetScreen onBack={() => goBack()} onSave={savePet} />}
-              {screen === 'editPet' && <AddPetScreen onBack={() => goBack()} onSave={updatePet} initialPet={selectedPet} mode="edit" />}
+              {screen === 'addPet' && <AddPetScreen onBack={() => goBack()} onSave={savePet} onAttachPhoto={attachPhotoToPet} />}
+              {screen === 'editPet' && <AddPetScreen onBack={() => goBack()} onSave={updatePet} onAttachPhoto={attachPhotoToPet} initialPet={selectedPet} mode="edit" />}
               {screen === 'profile' && <PetProfileScreen pet={selectedPet} onBack={() => goBack()} onEdit={() => navigateTo('editPet')} onOpenRecord={() => navigateTo('record')} onOpenPlan={() => navigateTo('plan')} onOpenAI={() => openAI('profile')} onOpenAlbum={() => { setAlbumFilterPetId(selectedPet.id); navigateTo('album') }} onOpenHistory={() => navigateTo('history')} />}
               {screen === 'record' && <RecordScreen onBack={() => goBack()} onSubmitRecord={saveRecord} />}
               {screen === 'plan' && <PlanScreen onBack={() => goBack()} onOpenProfile={openProfile} onCreatePlan={createPlan} onUpdatePlan={updatePlan} onOpenCalendar={() => navigateTo('calendar')} />}
@@ -416,7 +440,7 @@ function App() {
               {screen === 'member' && <MemberScreen isLoggedIn={isLoggedIn} onOpenLogin={() => navigateTo('login')} />}
               {screen === 'login' && <LoginScreen onBack={() => goBack()} onLogin={() => { setIsLoggedIn(true); goBack('member') }} />}
               {screen === 'ai' && <AIScreen selectedPetId={selectedPetId} onChangePet={setSelectedPetId} onBack={() => goBack(aiBackTarget)} />}
-              {screen === 'album' && <AlbumScreen selectedPetId={albumFilterPetId} onSelectPet={setAlbumFilterPetId} onBack={() => goBack()} />}
+              {screen === 'album' && <AlbumScreen selectedPetId={albumFilterPetId} onSelectPet={setAlbumFilterPetId} onRetagPhoto={(photo, petId) => { movePhotoToPet(photo, petId); setDataVersion((value) => value + 1) }} onUploadPhoto={(petId) => { const targetPetId = petId === 'all' ? pets[0].id : petId; attachPhotoToPet(targetPetId, 'upload') }} onBack={() => goBack()} />}
               {screen === 'history' && <HistoryScreen pet={selectedPet} onBack={() => goBack()} />}
               {screen === 'construction' && <ConstructionScreen onBack={() => goBack()} />}
             </div>
@@ -746,7 +770,7 @@ function PetProfileScreen({ pet, onBack, onEdit, onOpenRecord, onOpenPlan, onOpe
   )
 }
 
-function AlbumScreen({ selectedPetId, onSelectPet, onBack }: { selectedPetId: string; onSelectPet: (id: string) => void; onBack: () => void }) {
+function AlbumScreen({ selectedPetId, onSelectPet, onRetagPhoto, onUploadPhoto, onBack }: { selectedPetId: string; onSelectPet: (id: string) => void; onRetagPhoto: (photo: string, petId: string) => void; onUploadPhoto: (petId: string) => void; onBack: () => void }) {
   const [selectedPhoto, setSelectedPhoto] = useState<{ src: string; petId: string } | null>(null)
   const photoItems = pets.flatMap((pet) => pet.photos.map((photo, index) => ({ src: photo, petId: pet.id, petName: pet.name, key: `${pet.id}-${index}` })))
   const filteredPhotos = selectedPetId === 'all' ? photoItems : photoItems.filter((item) => item.petId === selectedPetId)
@@ -773,7 +797,7 @@ function AlbumScreen({ selectedPetId, onSelectPet, onBack }: { selectedPetId: st
           <MediaThumb src={selectedPhoto.src} alt={petById(selectedPhoto.petId)?.name ?? 'photo'} className="h-64 w-full rounded-2xl object-cover" fallbackClassName="flex items-center justify-center bg-stone-50" fallbackTextClassName="text-4xl" />
           <div className="mt-3 rounded-2xl bg-stone-50 px-4 py-4">
             <p className="text-xs font-semibold text-stone-500">照片標記</p>
-            <select value={selectedPhoto.petId} onChange={(event) => setSelectedPhoto((current) => current ? { ...current, petId: event.target.value } : current)} className="mt-2 w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm outline-none">
+            <select value={selectedPhoto.petId} onChange={(event) => { const nextPetId = event.target.value; onRetagPhoto(selectedPhoto.src, nextPetId); setSelectedPhoto((current) => current ? { ...current, petId: nextPetId } : current) }} className="mt-2 w-full rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm outline-none">
               {pets.map((pet) => <option key={pet.id} value={pet.id}>{pet.name} · {pet.species}</option>)}
             </select>
           </div>
@@ -782,7 +806,7 @@ function AlbumScreen({ selectedPetId, onSelectPet, onBack }: { selectedPetId: st
             <Button variant="secondary" className="flex-1 rounded-full" onClick={() => setSelectedPhoto(null)}>關閉放大</Button>
           </div>
         </section>}
-        <FloatingActionButton label="上傳" icon={<CirclePlus className="size-4" />} onClick={() => window.alert(selectedPetId === 'all' ? '開啟上傳，之後可手動標記爬寵' : `開啟上傳，預設標記為 ${petById(selectedPetId)?.name ?? '該爬寵'}`)} />
+        <FloatingActionButton label="上傳" icon={<CirclePlus className="size-4" />} onClick={() => onUploadPhoto(selectedPetId)} />
       </div>
     </SwipeBackPage>
   )
@@ -907,8 +931,8 @@ function RecordScreen({ onBack, onSubmitRecord }: { onBack: () => void; onSubmit
           <div className="mt-4 rounded-[24px] bg-orange-50 p-4">
             <p className="text-sm font-semibold text-orange-500">照片上傳 / 拍照</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">上傳照片</div>
-              <div className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">拍照</div>
+              <button onClick={() => window.alert(`已模擬上傳到 ${petById(selectedPetId)?.name ?? '該寵物'} 的相簿，送出後會保留`) } className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">上傳照片</button>
+              <button onClick={() => window.alert(`已模擬拍照到 ${petById(selectedPetId)?.name ?? '該寵物'} 的相簿，送出後會保留`) } className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">拍照</button>
             </div>
           </div>
 
@@ -919,7 +943,7 @@ function RecordScreen({ onBack, onSubmitRecord }: { onBack: () => void; onSubmit
   )
 }
 
-function AddPetScreen({ onBack, onSave, initialPet, mode = 'create' }: { onBack: () => void; onSave: (pet: PetProfile) => void; initialPet?: PetProfile; mode?: 'create' | 'edit' }) {
+function AddPetScreen({ onBack, onSave, onAttachPhoto, initialPet, mode = 'create' }: { onBack: () => void; onSave: (pet: PetProfile) => void; onAttachPhoto: (petId: string, source: 'upload' | 'camera' | 'album') => void; initialPet?: PetProfile; mode?: 'create' | 'edit' }) {
   const [name, setName] = useState(initialPet?.name ?? '')
   const [speciesGroup, setSpeciesGroup] = useState(initialPet?.species.includes('龜') ? '龜類' : initialPet?.species.includes('守宮') ? '蜥蜴／守宮類' : initialPet?.species.includes('兩棲') ? '兩棲類' : initialPet?.species.includes('節肢') ? '節肢類' : '蛇類')
   const [speciesName, setSpeciesName] = useState(initialPet?.species ?? '')
@@ -959,9 +983,9 @@ function AddPetScreen({ onBack, onSave, initialPet, mode = 'create' }: { onBack:
           <div className="mt-4 rounded-[24px] bg-orange-50 p-4">
             <p className="text-sm font-semibold text-orange-500">大頭貼上傳／拍照</p>
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <div className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">上傳照片</div>
-              <div className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">拍照</div>
-              <div className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">APP 相簿</div>
+              <button onClick={() => initialPet?.id && onAttachPhoto(initialPet.id, 'upload')} className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">上傳照片</button>
+              <button onClick={() => initialPet?.id && onAttachPhoto(initialPet.id, 'camera')} className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">拍照</button>
+              <button onClick={() => initialPet?.id && onAttachPhoto(initialPet.id, 'album')} className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-semibold text-stone-700">APP 相簿</button>
             </div>
           </div>
           <Button className="mt-4 w-full rounded-full bg-stone-900 text-white" onClick={() => onSave({
