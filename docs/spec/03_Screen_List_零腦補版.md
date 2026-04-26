@@ -102,3 +102,61 @@
 
 ## D. 第三期畫面
 - Widget（提醒餵食 / 飼養天數）
+---
+
+## E. 前端實作補齊 Screen List（2026-04-26）
+> 依 `src/App.tsx` 目前實作補齊頁面清單與頁面間關係。
+
+### E-1 全域 Shell
+- 手機 mock 外框
+- TopBar
+- 可滾動內容區
+- BottomNav：爬寵 / 討論 / 首頁 / 商店 / 會員
+- 依頁面出現的 FloatingActionButton
+- 子頁共用返回按鈕與左側滑動返回
+
+### E-2 首頁相關
+- HomeScreen：首頁總覽
+- CalendarScreen：日曆詳情頁，可從首頁月曆或計畫頁進入
+- AIScreen：寵 AI+ 助手，可從首頁或寵物個體頁進入
+- ConstructionScreen：施工中 mock 頁
+
+### E-3 爬寵相關
+- PetHubScreen：爬寵 Hub
+- PetsScreen：我的爬寵列表
+- AddPetScreen：新增寵物
+- AddPetScreen edit mode：編輯寵物
+- PetProfileScreen：寵物個體頁
+- AlbumScreen：爬寵相簿
+- HistoryScreen：寵物歷史紀錄
+- RecordScreen：餵食／紀錄
+- PlanScreen：餵食計畫，內含 list / settings / create / edit 模式
+
+### E-4 討論相關
+- DiscussionScreen：討論列表
+- ArticleScreen：文章詳情與留言
+- EditorScreen：新增文章與編輯文章共用編輯器
+
+### E-5 商店相關
+- ShopScreen：商品列表
+- ProductScreen：商品詳情
+- CartScreen：購物車
+- CheckoutScreen：結帳
+
+### E-6 會員相關
+- MemberScreen logged-out：未登入會員頁
+- LoginScreen：登入／註冊
+- MemberScreen logged-in：已登入會員頁
+- 已登入會員頁內部分頁：會員資料、我的爬寵、我的文章、我的訂單、通知設定
+
+### E-7 主要頁面跳轉規則
+- 首頁可進：我的爬寵、餵食／紀錄、餵食計畫、討論、商店、相簿、日曆、AI、施工中。
+- 爬寵 Hub 可進：我的爬寵、餵食／紀錄、餵食計畫、相簿。
+- 我的爬寵列表可進：寵物個體頁；浮動按鈕可進新增寵物。
+- 寵物個體頁可進：編輯、紀錄、計畫、AI、相簿、歷史紀錄。
+- 討論列表可進：文章詳情；浮動按鈕可進文章編輯器。
+- 自己的文章可進：文章編輯器 edit mode。
+- 商店列表可進：商品詳情；浮動按鈕可進購物車。
+- 商品詳情可進：結帳。
+- 購物車可進：結帳。
+- 會員未登入可進：登入／註冊；登入成功返回會員頁。

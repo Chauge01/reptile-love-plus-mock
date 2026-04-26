@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爬蟲寵愛+ Module / Function Checklist</title>
+    <style>
+        :root {
+            --bg: #eef1f4;
+            --panel: #ffffff;
+            --text: #18212f;
+            --muted: #667085;
+            --line: #d5dce7;
+            --soft: #f8fafc;
+            --accent: #f97316;
+            --accent-dark: #c2410c;
+            --ok: #15803d;
+            --warn: #b45309;
+            --shadow: 0 16px 42px rgba(15, 23, 42, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(14px);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 18px;
+            align-items: start;
+            padding: 18px 24px 14px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 0;
+        }
+
+        .meta {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .principle {
+            margin-top: 12px;
+            max-width: 1040px;
+            border: 1px solid #fed7aa;
+            border-left: 5px solid var(--accent);
+            border-radius: 8px;
+            background: #fff7ed;
+            padding: 12px 14px;
+            color: #7c2d12;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .principle strong {
+            display: block;
+            margin-bottom: 2px;
+            color: #431407;
+        }
+
+        .progress-card {
+            min-width: 220px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--soft);
+            padding: 12px;
+        }
+
+        .progress-number {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .progress-label {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #e2e8f0;
+        }
+
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            transition: width 180ms ease;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
+            gap: 10px;
+            align-items: center;
+            padding: 0 24px 16px;
+        }
+
+        input,
+        select,
+        button,
+        textarea {
+            border: 1px solid #b9c3d0;
+            border-radius: 7px;
+            background: #fff;
+            color: #1f2937;
+            font: inherit;
+            font-size: 13px;
+        }
+
+        input,
+        select {
+            height: 36px;
+            padding: 0 10px;
+        }
+
+        button {
+            min-height: 36px;
+            padding: 0 12px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            border-color: var(--accent);
+            color: var(--accent-dark);
+            background: #fff7ed;
+        }
+
+        .primary {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .primary:hover {
+            background: var(--accent-dark);
+            color: #fff;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 16px;
+            padding: 18px 24px 32px;
+        }
+
+        aside {
+            position: sticky;
+            top: 152px;
+            align-self: start;
+            max-height: calc(100vh - 176px);
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .side-title {
+            margin: 0;
+            padding: 14px 14px 10px;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 2px;
+            padding: 0 8px 12px;
+        }
+
+        .nav-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: center;
+            min-height: 34px;
+            padding: 7px 8px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            text-align: left;
+        }
+
+        .nav-item.active,
+        .nav-item:hover {
+            background: #fff7ed;
+            color: var(--accent-dark);
+        }
+
+        .nav-count {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .content {
+            min-width: 0;
+        }
+
+        .section {
+            margin-bottom: 18px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            background: #fbfcfe;
+        }
+
+        .section h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: 0;
+        }
+
+        .section-desc {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .section-progress {
+            white-space: nowrap;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #edf1f6;
+            padding: 10px 12px;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f8fafc;
+            color: #475467;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        tr.done {
+            background: #f0fdf4;
+        }
+
+        tr.done .item-title {
+            color: #166534;
+            text-decoration: line-through;
+            text-decoration-thickness: 1px;
+        }
+
+        .date-cell {
+            width: 138px;
+        }
+
+        .check-cell {
+            width: 64px;
+            text-align: center;
+        }
+
+        .priority-cell {
+            width: 92px;
+        }
+
+        .status-cell {
+            width: 128px;
+        }
+
+        .notes-cell {
+            width: 260px;
+        }
+
+        .date-input {
+            width: 116px;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--ok);
+        }
+
+        .item-title {
+            margin: 0;
+            font-weight: 800;
+            line-height: 1.45;
+        }
+
+        .item-detail {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 7px;
+        }
+
+        .tag {
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #3730a3;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .priority {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 58px;
+            border-radius: 999px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .p0 { background: #fee2e2; color: #991b1b; }
+        .p1 { background: #ffedd5; color: #9a3412; }
+        .p2 { background: #e0f2fe; color: #075985; }
+        .p3 { background: #f1f5f9; color: #475569; }
+
+        .status-select {
+            width: 106px;
+        }
+
+        .notes-input {
+            width: 100%;
+            min-height: 40px;
+            resize: vertical;
+            padding: 8px 9px;
+            line-height: 1.45;
+        }
+
+        .empty {
+            display: none;
+            padding: 28px;
+            border: 1px dashed var(--line);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        @media (max-width: 1080px) {
+            .hero,
+            .toolbar,
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            aside {
+                position: static;
+                max-height: none;
+            }
+
+            .toolbar {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            header,
+            main {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .toolbar {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tr {
+                border-bottom: 1px solid var(--line);
+                padding: 10px 0;
+            }
+
+            td {
+                border-bottom: 0;
+                padding: 6px 12px;
+            }
+
+            .date-cell,
+            .check-cell,
+            .priority-cell,
+            .status-cell,
+            .notes-cell {
+                width: auto;
+            }
+
+            .date-cell::before { content: "日期"; }
+            .check-cell::before { content: "完成"; }
+            .priority-cell::before { content: "優先"; }
+            .status-cell::before { content: "狀態"; }
+            .notes-cell::before { content: "備註"; }
+
+            td::before {
+                display: block;
+                margin-bottom: 4px;
+                color: var(--muted);
+                font-size: 11px;
+                font-weight: 800;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <section class="hero">
+            <div>
+                <h1>爬蟲寵愛+ Module / Function Checklist</h1>
+                <p class="meta">依 `docs/spec` 與目前前端 mock 整理。工程師可逐項填日期、狀態、備註並勾選完成；資料會存在本機瀏覽器。</p>
+                <div class="principle">
+                    <strong>開發大原則：AI First</strong>
+                    所有核心介面與資料流都應優先考慮 AI 能讀、能解釋、能輔助決策：寵物狀態、紀錄、計畫、相簿、討論與會員資料需要結構化；使用者完成紀錄或修改資料後，AI 摘要與後續提醒應能同步反映最新脈絡。
+                </div>
+            </div>
+            <div class="progress-card" aria-live="polite">
+                <div class="progress-number" id="overallPercent">0%</div>
+                <div class="progress-label" id="overallLabel">0 / 0 completed</div>
+                <div class="progress-bar"><span id="overallBar"></span></div>
+            </div>
+        </section>
+
+        <section class="toolbar" aria-label="Checklist controls">
+            <input id="searchInput" type="search" placeholder="搜尋功能、模組、關鍵字">
+            <select id="sectionFilter" aria-label="篩選模組"></select>
+            <select id="priorityFilter" aria-label="篩選優先級">
+                <option value="all">全部優先級</option>
+                <option value="P0">P0 核心</option>
+                <option value="P1">P1 重要</option>
+                <option value="P2">P2 支援</option>
+                <option value="P3">P3 後續</option>
+            </select>
+            <select id="doneFilter" aria-label="篩選完成狀態">
+                <option value="all">全部狀態</option>
+                <option value="open">未完成</option>
+                <option value="done">已完成</option>
+            </select>
+            <button type="button" id="exportButton">匯出 JSON</button>
+            <button type="button" id="resetButton">清除本機紀錄</button>
+        </section>
+    </header>
+
+    <main>
+        <aside>
+            <p class="side-title">模組導覽</p>
+            <nav class="nav-list" id="sideNav" aria-label="Checklist sections"></nav>
+        </aside>
+
+        <section class="content">
+            <div id="sections"></div>
+            <div class="empty" id="emptyState">目前篩選條件下沒有項目。</div>
+        </section>
+    </main>
+
+    <script>
+        const STORAGE_KEY = "reptile-love-plus-module-checklist-v1";
+
+        const sections = [
+            {
+                id: "principles",
+                title: "0. 核心介面與開發原則",
+                desc: "優先確保全域 shell、AI First、mock 狀態與設計檢查流程一致。",
+                items: [
+                    ["principle-ai-first", "AI First 資料與介面原則", "所有寵物、紀錄、計畫、相簿、討論、會員資料都以結構化資料為優先，方便 AI 摘要、提醒與後續分析。", "P0", ["AI", "Architecture"]],
+                    ["principle-mobile-shell", "手機 Mock Shell", "維持 iPhone 風格外框、TopBar、可滾動內容區、BottomNav、FAB。", "P0", ["UI", "Shell"]],
+                    ["principle-bottom-nav", "底部五 Tab 導覽", "爬寵、討論、首頁、商店、會員固定存在，子頁需正確映射 active tab。", "P0", ["Navigation"]],
+                    ["principle-back-stack", "返回堆疊與 fallback", "子頁返回上一頁；底部 Tab 切換清空 backStack；AI 依來源返回首頁或個體頁。", "P0", ["Navigation", "State"]],
+                    ["principle-swipe-back", "左側滑動返回", "支援從畫面左側右滑返回：起點靠左、水平位移足夠、垂直位移不大。", "P1", ["Gesture"]],
+                    ["principle-fab", "依頁面顯示 FAB", "討論顯示發文、商店顯示購物車、我的爬寵顯示新增寵物、個體頁顯示寵 AI+。", "P0", ["Navigation", "CTA"]],
+                    ["principle-memory", "前端 mock 記憶體限制", "資料變更目前只在前端記憶體或本機儲存；重新整理後 mock data 不保留，需明確標註。", "P1", ["Mock"]],
+                    ["principle-alerts", "Mock alert 規則", "權限、成功、錯誤、送出訂單、草稿儲存等目前用 alert 表示，尚未串 API。", "P1", ["Mock", "UX"]]
+                ]
+            },
+            {
+                id: "home",
+                title: "1. 首頁 Home",
+                desc: "首頁是核心入口與總覽，優先讓使用者快速進入爬寵、紀錄、計畫、AI 與日曆。",
+                items: [
+                    ["home-main", "首頁長頁主畫面", "可下滑長頁，首屏顯示關鍵任務與 AI 入口，後續顯示討論與商店預覽。", "P0", ["Home", "UI"]],
+                    ["home-today-widget", "Today Widget", "顯示今日照護任務，卡片可點進對應寵物個體頁。", "P0", ["Home", "Task"]],
+                    ["home-ai-entry", "寵 AI+ 助手入口", "首頁提供明確 AI 入口，進入 AI 後返回目標為首頁。", "P0", ["Home", "AI"]],
+                    ["home-shortcuts", "快捷入口", "我的爬寵、餵食／紀錄、餵食計畫、爬寵相簿、日曆等入口。", "P0", ["Home", "Navigation"]],
+                    ["home-calendar-block", "首頁月曆 Block", "整月月曆，紅點表示餵食，藍點表示其他事件；點日期更新 selectedDate。", "P1", ["Calendar"]],
+                    ["home-discussion-preview", "討論文章預覽", "首頁文章卡可進文章詳情。", "P1", ["Discussion"]],
+                    ["home-store-preview", "商店商品預覽", "首頁商品卡可進商品詳情。", "P1", ["Store"]],
+                    ["home-construction", "施工中 mock 頁入口", "首頁可觸發施工中頁，提供返回。", "P3", ["Mock"]]
+                ]
+            },
+            {
+                id: "pet-core",
+                title: "2. 爬寵核心 Pet Core",
+                desc: "最優先核心：我的爬寵、餵食／紀錄、餵食計畫、寵 AI+。",
+                items: [
+                    ["pet-hub", "爬寵 Hub", "集中我的爬寵、餵食／紀錄、餵食計畫、爬寵相簿入口。", "P0", ["Pet", "Hub"]],
+                    ["pet-list", "我的爬寵列表", "寵物卡顯示照片、名稱、品種、狀態、年齡或照護天數、最近事件；點卡進個體頁。", "P0", ["Pet", "List"]],
+                    ["pet-add-fab", "新增寵物 FAB", "我的爬寵列表顯示右下新增寵物按鈕。", "P0", ["Pet", "CTA"]],
+                    ["pet-add-form", "新增寵物表單", "名稱、大類、詳細品種、性別、日期、體重與單位、照片來源。", "P0", ["Pet", "Form"]],
+                    ["pet-add-save", "新增寵物儲存流程", "新增到 pets 最前方、刷新 AI 摘要、選取新寵物、提示成功、返回列表。", "P0", ["Pet", "State"]],
+                    ["pet-profile", "寵物個體頁", "顯示資料摘要、圖表、AI 摘要、時間軸、照片入口、核心操作。", "P0", ["Pet", "Profile"]],
+                    ["pet-profile-actions", "個體頁操作列", "編輯資料、餵食／紀錄、餵食計畫、寵 AI+、爬寵相簿、歷史紀錄。", "P0", ["Pet", "Navigation"]],
+                    ["pet-edit-form", "編輯寵物表單", "沿用新增表單並帶入 initialPet。", "P0", ["Pet", "Form"]],
+                    ["pet-edit-save", "編輯寵物儲存流程", "覆蓋原寵物資料、刷新 AI 摘要、提示成功、返回個體頁。", "P0", ["Pet", "State"]],
+                    ["pet-charts", "個體頁圖表", "體重折線、餵食頻率、濕度趨勢。", "P1", ["Chart"]],
+                    ["pet-timeline", "近期時間軸", "顯示最近照護事件，新增紀錄後要同步更新。", "P0", ["Timeline"]],
+                    ["pet-history", "完整歷史紀錄", "列出 records，標示異常與有照片 badge。", "P1", ["History"]]
+                ]
+            },
+            {
+                id: "record",
+                title: "3. 餵食／紀錄 Record",
+                desc: "高頻核心表單，需確保送出後資料能回寫寵物、時間軸、相簿與 AI 摘要。",
+                items: [
+                    ["record-select-pet", "選擇寵物", "紀錄頁可選寵物，並依選取寵物帶入物種模板。", "P0", ["Record", "Pet"]],
+                    ["record-time", "日期時間欄位", "目前以小時 select 為主，日期使用 mock 當日。", "P1", ["Record", "Time"]],
+                    ["record-species-presets", "物種模板", "蛇、守宮、龜、澤龜、兩棲、節肢等 preset。", "P0", ["Record", "Template"]],
+                    ["record-food", "餵食內容", "依物種模板提供選項，支援其他輸入。", "P0", ["Record", "Food"]],
+                    ["record-food-weight-qty", "餵食重量與數量", "可輸入重量與數量，儲存結果只顯示有輸入欄位。", "P0", ["Record", "Form"]],
+                    ["record-advanced", "進階紀錄展開／收起", "事件與排泄欄位放在進階區。", "P1", ["Record", "UI"]],
+                    ["record-events", "事件紀錄", "可選事件，支援其他事件與自定義標籤。", "P0", ["Record", "Event"]],
+                    ["record-stool", "排泄紀錄", "可選排泄狀態，支援其他描述與自定義標籤。", "P1", ["Record", "Health"]],
+                    ["record-custom-tags", "自定義標籤", "餵食、事件、排泄的其他輸入可儲存為自定義標籤並立即選用。", "P0", ["Record", "Custom"]],
+                    ["record-risk-alert", "高風險提示", "高風險事件或排泄內容顯示警示提示。", "P1", ["Record", "Health"]],
+                    ["record-photo-actions", "拍照／上傳照片 mock", "表單內提供拍照與上傳，送出後照片可掛入相簿。", "P1", ["Photo"]],
+                    ["record-submit", "送出紀錄流程", "新增 records、timeline、latestEvent；餵食紀錄更新 latestFeedDate。", "P0", ["Record", "State"]],
+                    ["record-linked-plan", "送出後同步計畫狀態", "送出後嘗試把未完成的餵食／泡水／觀察計畫標記完成。", "P1", ["Plan", "State"]],
+                    ["record-return-profile", "送出後返回個體頁", "刷新 AI 摘要與畫面後回到目前寵物個體頁。", "P0", ["Navigation"]]
+                ]
+            },
+            {
+                id: "plan-calendar",
+                title: "4. 餵食計畫與日曆",
+                desc: "計畫負責建立與編輯照護排程；日曆負責總覽、篩選與跳轉。",
+                items: [
+                    ["plan-modes", "計畫頁模式", "list、settings、create、edit 四種模式。", "P0", ["Plan", "Mode"]],
+                    ["plan-list", "計畫列表", "列出既有計畫，可選取查看詳情。", "P0", ["Plan", "List"]],
+                    ["plan-settings", "通知設定入口", "設定模式提供開啟通知 mock，導向 Apple 設定提示。", "P1", ["Notification"]],
+                    ["plan-create-form", "新增計畫表單", "寵物、任務類型、頻率、時間。", "P0", ["Plan", "Form"]],
+                    ["plan-type-custom", "任務類型其他與自定義", "任務類型支援其他輸入並可儲存自定義標籤。", "P1", ["Plan", "Custom"]],
+                    ["plan-frequency-interval", "每間隔數天", "頻率模式之一，輸入間隔天數。", "P0", ["Plan", "Schedule"]],
+                    ["plan-frequency-weekly", "每週特定時間", "頻率模式之一，可多選星期與時分。", "P0", ["Plan", "Schedule"]],
+                    ["plan-preview-week", "同週視圖／排程預覽", "顯示一週內每天是否有排程與寵物摘要。", "P1", ["Plan", "Preview"]],
+                    ["plan-create-events", "新增計畫展開事件", "依間隔或週幾規則建立一或多筆 calendarEvents。", "P0", ["Plan", "State"]],
+                    ["plan-edit", "編輯計畫", "更新原 event 的寵物、類型、標題、頻率、日期、時間。", "P0", ["Plan", "Edit"]],
+                    ["plan-detail-actions", "計畫詳情操作", "前往寵物頁、通知權限引導。", "P1", ["Plan", "Navigation"]],
+                    ["calendar-month", "日曆整月總覽", "只保留整月月曆，不做月曆／日檢視切換。", "P0", ["Calendar"]],
+                    ["calendar-dots", "日曆事件色點", "餵食紅點，其他事件藍點。", "P1", ["Calendar", "Visual"]],
+                    ["calendar-filters", "日曆篩選", "依寵物與事件類型篩選。", "P0", ["Calendar", "Filter"]],
+                    ["calendar-event-list", "當日事件列表", "點日期後顯示該日事件。", "P0", ["Calendar", "List"]],
+                    ["calendar-event-detail", "事件詳情", "點事件顯示詳情，可跳寵物頁或紀錄頁。", "P0", ["Calendar", "Navigation"]]
+                ]
+            },
+            {
+                id: "album-ai",
+                title: "5. 相簿與寵 AI+",
+                desc: "相簿與 AI 是跨首頁、個體頁、紀錄頁的核心輔助能力。",
+                items: [
+                    ["album-entry", "相簿入口", "可從首頁、爬寵 Hub、寵物個體頁進入。", "P0", ["Album", "Navigation"]],
+                    ["album-filter-default", "相簿預設篩選", "從個體頁進入預設該寵物；從首頁或 Hub 進入預設全部。", "P0", ["Album", "Filter"]],
+                    ["album-filter-select", "相簿寵物篩選", "可切全部寵物或單一寵物。", "P0", ["Album", "Filter"]],
+                    ["album-grid", "三欄照片 grid", "照片來自各寵物 photos 與 mock upload images。", "P1", ["Album", "UI"]],
+                    ["album-photo-detail", "照片放大檢視", "點照片顯示放大與目前歸屬寵物。", "P1", ["Album", "Photo"]],
+                    ["album-retag", "手動標記照片歸屬", "更改 select 後把照片從所有寵物移除，再加入新寵物相簿最前方。", "P0", ["Album", "State"]],
+                    ["album-upload", "相簿上傳 FAB", "上傳 mock 照片到目前篩選寵物；全部篩選時預設第一隻寵物。", "P1", ["Album", "Upload"]],
+                    ["ai-entry-context", "AI 入口脈絡", "從首頁或個體頁進入時保存不同返回目標。", "P0", ["AI", "Navigation"]],
+                    ["ai-pet-switch", "AI 寵物切換", "AI 對話窗最上方可切換寵物。", "P0", ["AI", "Pet"]],
+                    ["ai-summary", "AI 最新事件摘要", "顯示該寵物 latestEvent 與 aiLastLine，紀錄或計畫變更後刷新。", "P0", ["AI", "Summary"]],
+                    ["ai-chat-layout", "GPT 式對話排版", "assistant 與 user 氣泡樣式區隔。", "P1", ["AI", "UI"]],
+                    ["ai-input", "AI 輸入列", "附件 mock 按鈕、textarea、送出按鈕；目前不新增訊息。", "P2", ["AI", "Input"]],
+                    ["ai-photo-upload", "AI 圖片上傳入口", "圖片上傳按鈕位於輸入框左側。", "P2", ["AI", "Photo"]]
+                ]
+            },
+            {
+                id: "discussion",
+                title: "6. 討論 Community",
+                desc: "討論需要支援閱讀、發文、編輯、留言與愛心限制。",
+                items: [
+                    ["discussion-list", "討論列表", "文章卡含預覽圖、分類、標題、摘要、作者、日期、愛心、回覆數。", "P0", ["Discussion", "List"]],
+                    ["discussion-open-article", "列表開文章詳情", "點文章進文章內頁。", "P0", ["Discussion", "Navigation"]],
+                    ["discussion-fab", "發文 FAB", "討論頁右下固定發文按鈕，進入編輯器。", "P0", ["Discussion", "CTA"]],
+                    ["editor-fields", "發文編輯器欄位", "標題、封面圖、文中圖片、正文。", "P0", ["Editor", "Form"]],
+                    ["editor-cover", "封面圖 mock 上傳", "按鈕會在 mock 圖片間輪替。", "P1", ["Editor", "Image"]],
+                    ["editor-inline-images", "文中圖片加入與移除", "最多保留 5 張，點已加入圖片可移除。", "P1", ["Editor", "Image"]],
+                    ["editor-draft", "草稿儲存 mock", "草稿儲存顯示 alert。", "P2", ["Editor", "Draft"]],
+                    ["editor-validation", "發布必填驗證", "標題與正文必填，缺漏 alert。", "P0", ["Editor", "Validation"]],
+                    ["post-publish", "新發文流程", "建立 mock post、加入列表最前方、初始化留言、清空草稿、進文章詳情。", "P0", ["Editor", "State"]],
+                    ["post-edit", "本人文章編輯", "自己的文章顯示編輯入口，帶入原文；發布後更新原文章。", "P0", ["Article", "Edit"]],
+                    ["article-layout", "文章內頁排版", "作者、日期、分類、愛心、留言、圖片與內容完整呈現。", "P1", ["Article", "UI"]],
+                    ["article-like", "愛心限制", "每篇每 session 只能按一次，重複按 alert。", "P0", ["Article", "Like"]],
+                    ["comment-list", "留言列表", "讀取即時留言數與留言內容。", "P1", ["Comment"]],
+                    ["comment-submit", "留言送出", "trim 空白；空白 alert；成功新增最前方、更新回覆數並清空輸入。", "P0", ["Comment", "State"]]
+                ]
+            },
+            {
+                id: "store",
+                title: "7. 商店、購物車與結帳",
+                desc: "商店流程目前是 mock commerce，需清楚標示哪些不切頁、不串金流。",
+                items: [
+                    ["shop-list", "商店商品列表", "商品卡顯示圖片、名稱、分類、價格、badge、庫存。", "P0", ["Store", "List"]],
+                    ["shop-add-cart", "列表加入購物車", "可直接加入購物車，已存在則數量加一。", "P0", ["Cart", "State"]],
+                    ["shop-cart-fab", "商店購物車 FAB", "商店頁右下固定購物車入口，顯示數量。", "P0", ["Cart", "CTA"]],
+                    ["product-detail", "商品詳情", "圖片、價格、描述、規格、庫存、運送資訊。", "P0", ["Product"]],
+                    ["product-add-cart", "詳情加入購物車", "加入後停留商品頁並提示。", "P0", ["Cart"]],
+                    ["product-buy-now", "立即購買", "先加入購物車，再進入結帳頁。", "P0", ["Checkout"]],
+                    ["cart-list", "購物車列表", "列出商品、數量、小計與總計。", "P0", ["Cart", "List"]],
+                    ["cart-no-edit", "購物車限制", "目前不提供刪除與調整數量。", "P2", ["Cart", "Limitation"]],
+                    ["cart-checkout", "前往結帳", "購物車可進結帳頁。", "P0", ["Checkout", "Navigation"]],
+                    ["checkout-form", "結帳欄位", "收件人、手機、縣市／地區、地址、備註。", "P0", ["Checkout", "Form"]],
+                    ["checkout-total", "訂單總計", "結帳頁顯示購物車總計。", "P0", ["Checkout"]],
+                    ["checkout-submit", "送出訂單 mock", "送出只 alert，不清空購物車、不切訂單完成頁。", "P1", ["Checkout", "Mock"]]
+                ]
+            },
+            {
+                id: "member",
+                title: "8. 會員與通知",
+                desc: "會員目前是登入 mock 與本機狀態分頁。",
+                items: [
+                    ["member-logged-out", "未登入會員頁", "顯示登入引導與前往登入按鈕。", "P0", ["Member", "Auth"]],
+                    ["login-form", "登入／註冊表單", "Email、密碼、暱稱。", "P0", ["Login", "Form"]],
+                    ["login-oauth", "Google / Apple mock", "顯示 OAuth mock 按鈕。", "P2", ["Login", "OAuth"]],
+                    ["login-success", "登入成功流程", "按登入後 isLoggedIn=true，返回會員頁。", "P0", ["Login", "State"]],
+                    ["member-tabs", "已登入會員分頁", "會員資料、我的爬寵、我的文章、我的訂單、通知設定。", "P0", ["Member", "Tabs"]],
+                    ["member-profile-edit", "會員資料編輯", "可編輯名稱與 Email，儲存 alert。", "P1", ["Member", "Profile"]],
+                    ["member-pets", "我的爬寵摘要", "顯示目前 mock pets 摘要。", "P1", ["Member", "Pets"]],
+                    ["member-posts", "我的文章", "顯示本人文章摘要。", "P1", ["Member", "Posts"]],
+                    ["member-orders", "我的訂單", "可切換 mock 訂單 RL+1024 / RL+1021 並顯示狀態。", "P1", ["Member", "Orders"]],
+                    ["member-notify", "通知設定單一開關", "切換已開啟／未開啟 badge，mock 跳轉 Apple 設定。", "P0", ["Notification"]]
+                ]
+            },
+            {
+                id: "data-media",
+                title: "9. Mock Data、圖片與共用元件",
+                desc: "確保 mock data、媒體顯示與共用 UI 行為可支持所有核心流程。",
+                items: [
+                    ["data-pets", "PetProfile mock data", "id、name、avatar、species、status、careDays、records、timeline、photos、AI 摘要等欄位。", "P0", ["Data", "Pet"]],
+                    ["data-calendar-events", "CalendarEvent mock data", "date、petId、type、title、detail、time、done。", "P0", ["Data", "Calendar"]],
+                    ["data-discussion", "DiscussionPost 與 postComments", "文章、圖片、內容、本人文章、留言資料。", "P0", ["Data", "Discussion"]],
+                    ["data-products", "Product mock data", "商品名稱、分類、價格、圖片、庫存、規格、運送。", "P0", ["Data", "Store"]],
+                    ["data-member", "MemberProfile mock data", "會員名稱、Email、通知等資訊。", "P1", ["Data", "Member"]],
+                    ["media-real-images", "真實 mock 圖片", "public/mock-images 內圖片可正常顯示，來源清單保留 sources.tsv。", "P1", ["Media"]],
+                    ["media-thumb", "MediaThumb fallback", "圖片路徑顯示 img，非圖片內容顯示文字 fallback。", "P1", ["Media", "Component"]],
+                    ["ui-input-field", "InputField / SelectField 共用", "表單欄位樣式與行為一致。", "P1", ["UI", "Component"]],
+                    ["ui-chart-cards", "LineChartCard / BarChartCard", "個體頁圖表可依 data 正確渲染。", "P1", ["UI", "Chart"]],
+                    ["ui-month-calendar", "MonthDotsCalendar", "可共用於首頁與日曆頁，支援 selectedDate 與事件點。", "P1", ["UI", "Calendar"]]
+                ]
+            },
+            {
+                id: "qa-handoff",
+                title: "10. QA、Handoff 與後續雲端",
+                desc: "交付前確認主流程可走通，並標示後續非 mock 工作。",
+                items: [
+                    ["qa-home-flow", "首頁主流程串測", "首頁 -> 任務 -> 個體頁、首頁 -> AI、首頁 -> 日曆。", "P0", ["QA"]],
+                    ["qa-pet-flow", "爬寵核心串測", "新增、編輯、紀錄、計畫、相簿、歷史、AI。", "P0", ["QA"]],
+                    ["qa-record-flow", "紀錄資料流測試", "送出後 records、timeline、latestEvent、照片、AI 摘要同步。", "P0", ["QA"]],
+                    ["qa-plan-calendar-flow", "計畫與日曆串測", "新增／編輯計畫後，日曆事件與詳情跳轉正確。", "P0", ["QA"]],
+                    ["qa-discussion-flow", "討論串測", "發文、編輯、愛心限制、留言。", "P1", ["QA"]],
+                    ["qa-store-flow", "商店串測", "加入購物車、立即購買、結帳、送出 mock。", "P1", ["QA"]],
+                    ["qa-member-flow", "會員串測", "登入、分頁、資料儲存、訂單切換、通知開關。", "P1", ["QA"]],
+                    ["qa-build", "Build 驗證", "`npm run build` 成功。", "P0", ["QA", "Build"]],
+                    ["handoff-cloud", "雲端資料落地評估", "最終會員、寵物、討論、購物資訊需落雲端，可評估 Cloudflare + AWS。", "P3", ["Backend"]],
+                    ["handoff-api", "真實 API 串接", "登入、付款、通知、相機、相簿權限、AI 對話皆需後續串接。", "P3", ["Backend", "API"]]
+                ]
+            }
+        ];
+
+        const defaultItemState = () => ({ done: false, date: "", status: "todo", notes: "" });
+        let state = loadState();
+
+        function loadState() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+            } catch {
+                return {};
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function itemState(id) {
+            if (!state[id]) state[id] = defaultItemState();
+            return state[id];
+        }
+
+        function allItems() {
+            return sections.flatMap((section) => section.items.map((item) => ({ section, item })));
+        }
+
+        function priorityClass(priority) {
+            return priority.toLowerCase();
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;");
+        }
+
+        function renderFilters() {
+            const select = document.getElementById("sectionFilter");
+            select.innerHTML = `<option value="all">全部模組</option>` + sections
+                .map((section) => `<option value="${section.id}">${section.title}</option>`)
+                .join("");
+        }
+
+        function renderSideNav(visibleCounts) {
+            const sideNav = document.getElementById("sideNav");
+            sideNav.innerHTML = sections.map((section) => {
+                const count = visibleCounts.get(section.id) || 0;
+                return `<button type="button" class="nav-item" data-section-jump="${section.id}">
+                    <span>${section.title}</span>
+                    <span class="nav-count">${count}</span>
+                </button>`;
+            }).join("");
+
+            sideNav.querySelectorAll("[data-section-jump]").forEach((button) => {
+                button.addEventListener("click", () => {
+                    const target = document.getElementById(`section-${button.dataset.sectionJump}`);
+                    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+                });
+            });
+        }
+
+        function matchesFilters(section, item) {
+            const query = document.getElementById("searchInput").value.trim().toLowerCase();
+            const sectionFilter = document.getElementById("sectionFilter").value;
+            const priorityFilter = document.getElementById("priorityFilter").value;
+            const doneFilter = document.getElementById("doneFilter").value;
+            const [id, title, detail, priority, tags] = item;
+            const current = itemState(id);
+            const haystack = `${section.title} ${title} ${detail} ${priority} ${tags.join(" ")}`.toLowerCase();
+
+            if (sectionFilter !== "all" && section.id !== sectionFilter) return false;
+            if (priorityFilter !== "all" && priority !== priorityFilter) return false;
+            if (doneFilter === "done" && !current.done) return false;
+            if (doneFilter === "open" && current.done) return false;
+            if (query && !haystack.includes(query)) return false;
+            return true;
+        }
+
+        function render() {
+            const container = document.getElementById("sections");
+            const visibleCounts = new Map();
+            let renderedSections = 0;
+
+            container.innerHTML = sections.map((section) => {
+                const visibleItems = section.items.filter((item) => matchesFilters(section, item));
+                visibleCounts.set(section.id, visibleItems.length);
+                if (!visibleItems.length) return "";
+                renderedSections += 1;
+
+                const doneInSection = section.items.filter((item) => itemState(item[0]).done).length;
+                const rows = visibleItems.map((item) => {
+                    const [id, title, detail, priority, tags] = item;
+                    const current = itemState(id);
+                    const doneClass = current.done ? "done" : "";
+                    return `<tr class="${doneClass}" data-item-id="${id}">
+                        <td class="date-cell"><input class="date-input" type="date" value="${escapeHtml(current.date)}" data-field="date" data-id="${id}"></td>
+                        <td class="check-cell"><input class="checkbox" type="checkbox" ${current.done ? "checked" : ""} data-field="done" data-id="${id}" aria-label="完成 ${escapeHtml(title)}"></td>
+                        <td>
+                            <p class="item-title">${escapeHtml(title)}</p>
+                            <p class="item-detail">${escapeHtml(detail)}</p>
+                            <div class="tag-row">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+                        </td>
+                        <td class="priority-cell"><span class="priority ${priorityClass(priority)}">${priority}</span></td>
+                        <td class="status-cell">
+                            <select class="status-select" data-field="status" data-id="${id}">
+                                <option value="todo" ${current.status === "todo" ? "selected" : ""}>待做</option>
+                                <option value="doing" ${current.status === "doing" ? "selected" : ""}>開發中</option>
+                                <option value="review" ${current.status === "review" ? "selected" : ""}>待檢查</option>
+                                <option value="done" ${current.status === "done" ? "selected" : ""}>完成</option>
+                                <option value="blocked" ${current.status === "blocked" ? "selected" : ""}>卡住</option>
+                            </select>
+                        </td>
+                        <td class="notes-cell"><textarea class="notes-input" data-field="notes" data-id="${id}" placeholder="工程備註 / PR / blocker">${escapeHtml(current.notes)}</textarea></td>
+                    </tr>`;
+                }).join("");
+
+                return `<section class="section" id="section-${section.id}">
+                    <div class="section-header">
+                        <div>
+                            <h2>${section.title}</h2>
+                            <p class="section-desc">${section.desc}</p>
+                        </div>
+                        <div class="section-progress">${doneInSection} / ${section.items.length}</div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>完成</th>
+                                <th>功能 / 驗收重點</th>
+                                <th>優先</th>
+                                <th>狀態</th>
+                                <th>備註</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </section>`;
+            }).join("");
+
+            renderSideNav(visibleCounts);
+            document.getElementById("emptyState").style.display = renderedSections ? "none" : "block";
+            bindItemEvents();
+            updateProgress();
+        }
+
+        function bindItemEvents() {
+            document.querySelectorAll("[data-field]").forEach((input) => {
+                const eventName = input.dataset.field === "notes" ? "input" : "change";
+                input.addEventListener(eventName, handleFieldChange);
+            });
+        }
+
+        function handleFieldChange(event) {
+            const target = event.currentTarget;
+            const id = target.dataset.id;
+            const field = target.dataset.field;
+            const current = itemState(id);
+
+            if (field === "done") {
+                current.done = target.checked;
+                if (target.checked) {
+                    if (!current.date) current.date = new Date().toISOString().slice(0, 10);
+                    current.status = "done";
+                } else if (current.status === "done") {
+                    current.status = "todo";
+                }
+            } else {
+                current[field] = target.value;
+                if (field === "status") current.done = target.value === "done";
+            }
+
+            saveState();
+            if (field === "done" || field === "status") {
+                render();
+            } else {
+                updateProgress();
+            }
+        }
+
+        function updateProgress() {
+            const items = allItems();
+            const done = items.filter(({ item }) => itemState(item[0]).done).length;
+            const total = items.length;
+            const percent = total ? Math.round((done / total) * 100) : 0;
+            document.getElementById("overallPercent").textContent = `${percent}%`;
+            document.getElementById("overallLabel").textContent = `${done} / ${total} completed`;
+            document.getElementById("overallBar").style.width = `${percent}%`;
+        }
+
+        function exportState() {
+            const payload = {
+                exportedAt: new Date().toISOString(),
+                storageKey: STORAGE_KEY,
+                state
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "reptile-love-plus-module-checklist-state.json";
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetState() {
+            if (!confirm("確定要清除這份 checklist 在本機瀏覽器的勾選、日期與備註嗎？")) return;
+            state = {};
+            localStorage.removeItem(STORAGE_KEY);
+            render();
+        }
+
+        renderFilters();
+        render();
+
+        document.getElementById("searchInput").addEventListener("input", render);
+        document.getElementById("sectionFilter").addEventListener("change", render);
+        document.getElementById("priorityFilter").addEventListener("change", render);
+        document.getElementById("doneFilter").addEventListener("change", render);
+        document.getElementById("exportButton").addEventListener("click", exportState);
+        document.getElementById("resetButton").addEventListener("click", resetState);
+    </script>
+</body>
+</html>

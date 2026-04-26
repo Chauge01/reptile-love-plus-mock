@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爬蟲寵愛+ IA 架構圖</title>
+    <style>
+        :root {
+            --bg: #edf0f3;
+            --panel: #ffffff;
+            --text: #18212f;
+            --muted: #667085;
+            --line: #cfd7e3;
+            --line-strong: #667085;
+            --accent: #f97316;
+            --accent-strong: #c2410c;
+            --shadow: 0 18px 48px rgba(15, 23, 42, 0.14);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+        }
+
+        main {
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 18px;
+            align-items: center;
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(14px);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 0;
+        }
+
+        .meta {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        button {
+            min-width: 38px;
+            height: 34px;
+            border: 1px solid #b9c3d0;
+            border-radius: 6px;
+            background: #fff;
+            color: #1f2937;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        button:hover,
+        button.active {
+            border-color: var(--accent);
+            color: var(--accent-strong);
+            background: #fff7ed;
+        }
+
+        .primary {
+            min-width: 76px;
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .primary:hover {
+            background: var(--accent-strong);
+            color: #fff;
+        }
+
+        .zoom-readout {
+            min-width: 58px;
+            text-align: center;
+            color: #475467;
+            font-size: 13px;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 270px 1fr;
+            min-height: 0;
+        }
+
+        aside {
+            border-right: 1px solid var(--line);
+            background: #f8fafc;
+            padding: 18px;
+            overflow: auto;
+        }
+
+        .side-title {
+            margin: 0 0 10px;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .focus-list,
+        .legend {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .focus-list button {
+            width: 100%;
+            height: auto;
+            min-height: 36px;
+            padding: 8px 10px;
+            text-align: left;
+            border-radius: 7px;
+            line-height: 1.35;
+        }
+
+        .pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #475467;
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            flex: 0 0 auto;
+            border-radius: 3px;
+            border: 1px solid rgba(0, 0, 0, 0.18);
+        }
+
+        .dot.nav { background: #263238; }
+        .dot.home { background: #fff7d6; }
+        .dot.pet { background: #e5f8ea; }
+        .dot.support { background: #e7f0ff; }
+        .dot.discuss { background: #e3f8f8; }
+        .dot.store { background: #ffe7ec; }
+        .dot.member { background: #f1e7ff; }
+
+        .note {
+            margin: 0 0 14px;
+            color: #667085;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .check {
+            margin: 0;
+            padding: 12px;
+            border: 1px solid #d6e1ef;
+            border-radius: 8px;
+            background: #fff;
+            color: #344054;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .canvas-shell {
+            min-width: 0;
+            min-height: 0;
+            padding: 18px;
+        }
+
+        .canvas {
+            position: relative;
+            height: calc(100vh - 92px);
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background:
+                linear-gradient(#edf2f7 1px, transparent 1px),
+                linear-gradient(90deg, #edf2f7 1px, transparent 1px),
+                #fff;
+            background-size: 24px 24px;
+            box-shadow: var(--shadow);
+            cursor: grab;
+        }
+
+        .canvas.dragging {
+            cursor: grabbing;
+            user-select: none;
+        }
+
+        .stage {
+            width: max-content;
+            min-width: 100%;
+            padding: 30px;
+            transform-origin: top left;
+        }
+
+        .mermaid {
+            width: max-content;
+            min-width: 1500px;
+        }
+
+        .status {
+            position: sticky;
+            left: 14px;
+            bottom: 14px;
+            z-index: 12;
+            width: fit-content;
+            max-width: 520px;
+            margin: 0 0 14px 14px;
+            padding: 9px 12px;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            background: rgba(255, 247, 237, 0.96);
+            color: #7c2d12;
+            font-size: 12px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+        }
+
+        .mermaid svg .node {
+            cursor: pointer;
+            transition: opacity 140ms ease, filter 140ms ease;
+        }
+
+        .mermaid svg .flowchart-link {
+            cursor: pointer;
+            transition: opacity 140ms ease, stroke 140ms ease, stroke-width 140ms ease, filter 140ms ease;
+        }
+
+        .mermaid svg .node.diagram-dim,
+        .mermaid svg .flowchart-link.diagram-dim,
+        .mermaid svg .cluster.diagram-dim {
+            opacity: 0.16;
+        }
+
+        .mermaid svg .node.node-active rect,
+        .mermaid svg .node.node-active polygon,
+        .mermaid svg .node.node-active circle,
+        .mermaid svg .node.node-active ellipse,
+        .mermaid svg .node.node-active path {
+            stroke: var(--accent) !important;
+            stroke-width: 4px !important;
+            filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.42));
+        }
+
+        .mermaid svg .node.node-neighbor rect,
+        .mermaid svg .node.node-neighbor polygon,
+        .mermaid svg .node.node-neighbor circle,
+        .mermaid svg .node.node-neighbor ellipse,
+        .mermaid svg .node.node-neighbor path {
+            stroke: #0ea5e9 !important;
+            stroke-width: 3px !important;
+            filter: drop-shadow(0 0 8px rgba(14, 165, 233, 0.34));
+        }
+
+        .mermaid svg .flowchart-link.link-active {
+            opacity: 1 !important;
+            stroke: var(--accent) !important;
+            stroke-width: 4px !important;
+            filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.55));
+        }
+
+        .mermaid svg .edgeLabel.link-active,
+        .mermaid svg .edgeLabel.label-active {
+            opacity: 1 !important;
+            filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4));
+        }
+
+        @media (max-width: 960px) {
+            header {
+                grid-template-columns: 1fr;
+                align-items: start;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            aside {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+                max-height: 260px;
+            }
+
+            .canvas {
+                height: calc(100vh - 342px);
+            }
+        }
+    </style>
+    <script type="module">
+        import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: "base",
+            flowchart: {
+                curve: "basis",
+                nodeSpacing: 42,
+                rankSpacing: 86,
+                padding: 18,
+                useMaxWidth: false
+            },
+            themeVariables: {
+                fontFamily: "Microsoft JhengHei, Noto Sans TC, Arial, sans-serif",
+                fontSize: "14px",
+                primaryColor: "#ffffff",
+                primaryTextColor: "#18212f",
+                primaryBorderColor: "#94a3b8",
+                lineColor: "#64748b",
+                clusterBkg: "#f8fafc",
+                clusterBorder: "#b6c2d2",
+                edgeLabelBackground: "#ffffff"
+            }
+        });
+
+        const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+        const nodeIdFromElement = (node) => node.id?.replace(/^flowchart-/, "").replace(/-\d+$/, "");
+        const edgeEnds = (edge) => {
+            const classes = [...edge.classList];
+            const classSource = classes.find((item) => item.startsWith("LS-"))?.slice(3);
+            const classTarget = classes.find((item) => item.startsWith("LE-"))?.slice(3);
+            if (classSource || classTarget) {
+                return { source: classSource, target: classTarget };
+            }
+
+            const rawId = edge.dataset.id || edge.id || "";
+            const match = rawId.match(/L_(.+)_(.+)_\d+$/);
+            if (match) {
+                return { source: match[1], target: match[2] };
+            }
+
+            return {
+                source: undefined,
+                target: undefined
+            };
+        };
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const canvas = document.querySelector(".canvas");
+            const stage = document.querySelector(".stage");
+            const readout = document.querySelector(".zoom-readout");
+            const status = document.querySelector(".status");
+            let zoom = 1;
+
+            const applyZoom = () => {
+                stage.style.transform = `scale(${zoom})`;
+                stage.style.marginRight = `${Math.max(0, stage.scrollWidth * (zoom - 1))}px`;
+                stage.style.marginBottom = `${Math.max(0, stage.scrollHeight * (zoom - 1))}px`;
+                readout.textContent = `${Math.round(zoom * 100)}%`;
+            };
+
+            const setZoom = (next) => {
+                zoom = clamp(next, 0.35, 2.3);
+                applyZoom();
+            };
+
+            document.querySelector("[data-zoom='in']").addEventListener("click", () => setZoom(zoom + 0.15));
+            document.querySelector("[data-zoom='out']").addEventListener("click", () => setZoom(zoom - 0.15));
+            document.querySelector("[data-zoom='reset']").addEventListener("click", () => setZoom(1));
+            document.querySelector("[data-zoom='fit']").addEventListener("click", () => {
+                const svg = stage.querySelector("svg");
+                if (!svg) return;
+                const next = ((canvas.clientWidth - 76) / svg.getBoundingClientRect().width) * zoom;
+                setZoom(next);
+                canvas.scrollTo({ left: 0, top: 0, behavior: "smooth" });
+            });
+
+            canvas.addEventListener("wheel", (event) => {
+                if (!event.ctrlKey && !event.metaKey) return;
+                event.preventDefault();
+                setZoom(zoom + (event.deltaY < 0 ? 0.08 : -0.08));
+            }, { passive: false });
+
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            let scrollLeft = 0;
+            let scrollTop = 0;
+
+            canvas.addEventListener("pointerdown", (event) => {
+                if (event.target.closest(".node") || event.target.closest(".flowchart-link")) return;
+                isDragging = true;
+                canvas.classList.add("dragging");
+                canvas.setPointerCapture(event.pointerId);
+                startX = event.clientX;
+                startY = event.clientY;
+                scrollLeft = canvas.scrollLeft;
+                scrollTop = canvas.scrollTop;
+            });
+
+            canvas.addEventListener("pointermove", (event) => {
+                if (!isDragging) return;
+                canvas.scrollLeft = scrollLeft - (event.clientX - startX);
+                canvas.scrollTop = scrollTop - (event.clientY - startY);
+            });
+
+            const stopDrag = () => {
+                isDragging = false;
+                canvas.classList.remove("dragging");
+            };
+
+            canvas.addEventListener("pointerup", stopDrag);
+            canvas.addEventListener("pointercancel", stopDrag);
+
+            const setupSpotlight = () => {
+                const svg = stage.querySelector("svg");
+                if (!svg) return false;
+
+                const nodes = [...svg.querySelectorAll(".node")];
+                const edges = [...svg.querySelectorAll(".flowchart-link")];
+                const edgeLabels = [...svg.querySelectorAll(".edgeLabel")];
+                const clusters = [...svg.querySelectorAll(".cluster")];
+                const nodeById = new Map(nodes.map((node) => [nodeIdFromElement(node), node]));
+
+                const clear = () => {
+                    nodes.forEach((node) => node.classList.remove("diagram-dim", "node-active", "node-neighbor"));
+                    edges.forEach((edge) => edge.classList.remove("diagram-dim", "link-active"));
+                    edgeLabels.forEach((label) => label.classList.remove("diagram-dim", "link-active", "label-active"));
+                    clusters.forEach((cluster) => cluster.classList.remove("diagram-dim"));
+                    document.querySelectorAll("[data-focus]").forEach((button) => button.classList.remove("active"));
+                    status.textContent = "提示：點左側模組、節點或線會固定高亮；點其他目標才會切換或清除。";
+                };
+
+                const applySpotlight = ({ activeNodeIds, neighborNodeIds = [], activeEdges = [], label }) => {
+                    const visible = new Set([...activeNodeIds, ...neighborNodeIds]);
+
+                    document.querySelectorAll("[data-focus]").forEach((button) => button.classList.remove("active"));
+
+                    nodes.forEach((node) => {
+                        const nodeId = nodeIdFromElement(node);
+                        node.classList.toggle("diagram-dim", !visible.has(nodeId));
+                        node.classList.toggle("node-active", activeNodeIds.has(nodeId));
+                        node.classList.toggle("node-neighbor", neighborNodeIds.includes(nodeId));
+                    });
+
+                    edges.forEach((edge) => {
+                        const isActive = activeEdges.includes(edge);
+                        edge.classList.toggle("diagram-dim", !isActive);
+                        edge.classList.toggle("link-active", isActive);
+                    });
+
+                    clusters.forEach((cluster) => cluster.classList.add("diagram-dim"));
+                    status.textContent = label;
+                };
+
+                const applyNodeFocus = (id) => {
+                    const activeEdges = [];
+                    const neighborNodeIds = [];
+
+                    edges.forEach((edge) => {
+                        const { source, target } = edgeEnds(edge);
+                        if (source === id || target === id) {
+                            if (source && source !== id) neighborNodeIds.push(source);
+                            if (target && target !== id) neighborNodeIds.push(target);
+                            activeEdges.push(edge);
+                        }
+                    });
+
+                    applySpotlight({
+                        activeNodeIds: new Set([id]),
+                        neighborNodeIds,
+                        activeEdges,
+                        label: `目前聚焦節點：${nodeById.get(id)?.textContent?.trim() ?? id}`
+                    });
+                };
+
+                const applyEdgeFocus = (edge) => {
+                    const { source, target } = edgeEnds(edge);
+                    const activeNodeIds = new Set([source, target].filter(Boolean));
+                    const sourceText = nodeById.get(source)?.textContent?.trim() ?? source;
+                    const targetText = nodeById.get(target)?.textContent?.trim() ?? target;
+
+                    applySpotlight({
+                        activeNodeIds,
+                        activeEdges: [edge],
+                        label: `目前聚焦連線：${sourceText} -> ${targetText}`
+                    });
+                };
+
+                const applyModuleFocus = (ids, label) => {
+                    const allowed = new Set(ids);
+                    document.querySelectorAll("[data-focus]").forEach((button) => button.classList.remove("active"));
+                    nodes.forEach((node) => {
+                        const id = nodeIdFromElement(node);
+                        node.classList.toggle("diagram-dim", !allowed.has(id));
+                        node.classList.toggle("node-active", allowed.has(id));
+                        node.classList.remove("node-neighbor");
+                    });
+                    edges.forEach((edge) => {
+                        const { source, target } = edgeEnds(edge);
+                        const isActive = allowed.has(source) && allowed.has(target);
+                        edge.classList.toggle("diagram-dim", !isActive);
+                        edge.classList.toggle("link-active", isActive);
+                    });
+                    clusters.forEach((cluster) => cluster.classList.add("diagram-dim"));
+                    status.textContent = `目前聚焦模組：${label}`;
+                };
+
+                nodes.forEach((node) => {
+                    const id = nodeIdFromElement(node);
+                    node.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        applyNodeFocus(id);
+                    });
+                    node.addEventListener("keydown", (event) => {
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        event.preventDefault();
+                        applyNodeFocus(id);
+                    });
+                    node.setAttribute("tabindex", "0");
+                });
+
+                edges.forEach((edge) => {
+                    edge.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        applyEdgeFocus(edge);
+                    });
+                });
+
+                svg.addEventListener("click", (event) => {
+                    if (event.target.closest(".node") || event.target.closest(".flowchart-link")) return;
+                    clear();
+                });
+
+                const focusGroups = {
+                    all: [],
+                    home: ["HomeMain", "HomeTasks", "HomeAI", "HomeQuick", "HomeCalendar", "HomeContent", "Construction"],
+                    pet: ["PetHub", "PetList", "AddPet", "PetProfile", "EditPet", "Record", "Plan", "Album", "History", "AIChat"],
+                    support: ["Calendar", "CalendarFilter", "EventList", "EventDetail", "PhotoDetail"],
+                    discuss: ["DiscussList", "Article", "Editor", "Comment"],
+                    store: ["Shop", "Product", "Cart", "Checkout"],
+                    member: ["MemberGate", "Login", "MemberProfile", "MemberPets", "MemberPosts", "MemberOrders", "MemberNotify"]
+                };
+
+                document.querySelectorAll("[data-focus]").forEach((button) => {
+                    button.addEventListener("click", () => {
+                        const key = button.dataset.focus;
+                        if (key === "all") {
+                            clear();
+                            button.classList.add("active");
+                            return;
+                        }
+                        applyModuleFocus(focusGroups[key] ?? [], button.textContent.trim());
+                        button.classList.add("active");
+                    });
+                });
+
+                clear();
+                return true;
+            };
+
+            const waitForDiagram = () => {
+                if (setupSpotlight()) {
+                    setTimeout(() => document.querySelector("[data-zoom='fit']").click(), 120);
+                    return;
+                }
+                setTimeout(waitForDiagram, 120);
+            };
+
+            waitForDiagram();
+        });
+    </script>
+</head>
+<body>
+    <main>
+        <header>
+            <div>
+                <h1>爬蟲寵愛+ IA 架構圖</h1>
+                <p class="meta">依最新 spec 與 `src/App.tsx` 整理。建議設計檢查時先用左側模組聚焦，再點節點或線看上下游。</p>
+            </div>
+            <div class="toolbar" aria-label="縮放工具列">
+                <button type="button" data-zoom="out" title="縮小">-</button>
+                <span class="zoom-readout">100%</span>
+                <button type="button" data-zoom="in" title="放大">+</button>
+                <button type="button" data-zoom="reset" title="回到 100%">100%</button>
+                <button type="button" class="primary" data-zoom="fit" title="適合視窗">適合</button>
+            </div>
+        </header>
+
+        <section class="workspace">
+            <aside>
+                <p class="side-title">聚焦模組</p>
+                <div class="focus-list">
+                    <button type="button" data-focus="all">全部顯示</button>
+                    <button type="button" data-focus="home">首頁 Home</button>
+                    <button type="button" data-focus="pet">爬寵核心 Pet Core</button>
+                    <button type="button" data-focus="support">支援工具 Calendar / Photo / AI</button>
+                    <button type="button" data-focus="discuss">討論 Community</button>
+                    <button type="button" data-focus="store">商店 Commerce</button>
+                    <button type="button" data-focus="member">會員 Member</button>
+                </div>
+
+                <p class="side-title">圖例</p>
+                <div class="legend">
+                    <span class="pill"><span class="dot nav"></span>全域導覽 / Shell</span>
+                    <span class="pill"><span class="dot home"></span>首頁入口</span>
+                    <span class="pill"><span class="dot pet"></span>爬寵核心</span>
+                    <span class="pill"><span class="dot support"></span>支援工具</span>
+                    <span class="pill"><span class="dot discuss"></span>討論</span>
+                    <span class="pill"><span class="dot store"></span>商店</span>
+                    <span class="pill"><span class="dot member"></span>會員</span>
+                </div>
+
+                <p class="note">操作：點左側模組、節點或線會固定高亮；點其他節點/線會切換；點「全部顯示」或空白畫布清除。Ctrl + 滾輪縮放，按住空白畫布拖曳。</p>
+                <p class="check">架構檢查：已移除前端沒有切頁的「訂單完成頁」；「愛寵筆記」改以「寵物個體頁」表達；留言、照片放大、會員分頁保留為頁內互動。</p>
+            </aside>
+
+            <div class="canvas-shell">
+                <section class="canvas" aria-label="IA 架構圖畫布">
+                    <div class="stage">
+                        <div class="mermaid">
+flowchart LR
+    subgraph NAV["固定底部導覽 / Global Shell"]
+        direction TB
+        NavShell["手機 Mock Shell&lt;br/&gt;TopBar / 可滾動內容 / FAB / BottomNav"]
+        TabPet["爬寵"]
+        TabDiscuss["討論"]
+        TabHome["首頁"]
+        TabStore["商店"]
+        TabMember["會員"]
+    end
+
+    subgraph HOME["首頁 Home：入口總覽"]
+        direction TB
+        HomeMain["首頁主畫面&lt;br/&gt;長頁，可下滑"]
+        HomeTasks["Today Widget&lt;br/&gt;今日任務 / 7 天待辦"]
+        HomeAI["寵 AI+ 入口&lt;br/&gt;返回首頁脈絡"]
+        HomeQuick["快捷入口&lt;br/&gt;爬寵 / 紀錄 / 計畫 / 相簿"]
+        HomeCalendar["月曆 Block&lt;br/&gt;紅點餵食 / 藍點其他"]
+        HomeContent["內容預覽&lt;br/&gt;討論文章 / 商品"]
+        Construction["施工中頁&lt;br/&gt;mock placeholder"]
+    end
+
+    subgraph PET["爬寵核心 Pet Core"]
+        direction TB
+        PetHub["爬寵 Hub&lt;br/&gt;四大核心入口"]
+        PetList["我的爬寵列表&lt;br/&gt;卡片進個體頁"]
+        AddPet["新增寵物&lt;br/&gt;儲存後回列表"]
+        PetProfile["寵物個體頁&lt;br/&gt;資料 / 圖表 / 時間軸 / 照片"]
+        EditPet["編輯寵物&lt;br/&gt;儲存後回個體頁"]
+        Record["餵食／紀錄&lt;br/&gt;物種模板 / 自定義標籤"]
+        Plan["餵食計畫&lt;br/&gt;list / settings / create / edit"]
+        Album["爬寵相簿&lt;br/&gt;全部或指定寵物 filter"]
+        History["歷史紀錄&lt;br/&gt;異常 / 有照片 badge"]
+        AIChat["寵 AI+ 對話&lt;br/&gt;切換寵物 / mock input"]
+    end
+
+    subgraph SUPPORT["支援工具 Calendar / Photo / AI"]
+        direction TB
+        Calendar["日曆頁&lt;br/&gt;整月月曆"]
+        CalendarFilter["篩選&lt;br/&gt;寵物 / 事件類型"]
+        EventList["當日事件列表"]
+        EventDetail["事件詳情&lt;br/&gt;前往寵物頁 / 紀錄頁"]
+        PhotoDetail["照片放大檢視&lt;br/&gt;重新標記歸屬寵物"]
+    end
+
+    subgraph DISCUSS["討論 Community"]
+        direction TB
+        DiscussList["討論列表&lt;br/&gt;文章卡 / 愛心 / 回覆數"]
+        Article["文章詳情&lt;br/&gt;內容 / 圖片 / 留言"]
+        Editor["發文編輯器&lt;br/&gt;新增與編輯共用"]
+        Comment["留言互動&lt;br/&gt;空白驗證 / 成功後置頂"]
+    end
+
+    subgraph STORE["商店 Commerce"]
+        direction TB
+        Shop["商店列表&lt;br/&gt;商品卡 / 加入購物車"]
+        Product["商品詳情&lt;br/&gt;規格 / 庫存 / 運送"]
+        Cart["購物車&lt;br/&gt;數量累加 / 總計"]
+        Checkout["結帳&lt;br/&gt;收件資料 / 備註 / mock 送出"]
+    end
+
+    subgraph MEMBER["會員 Member"]
+        direction TB
+        MemberGate["會員頁&lt;br/&gt;未登入引導 / 已登入分頁"]
+        Login["登入／註冊&lt;br/&gt;Email / 密碼 / 暱稱 / OAuth mock"]
+        MemberProfile["會員資料&lt;br/&gt;名稱 / Email"]
+        MemberPets["我的爬寵摘要"]
+        MemberPosts["我的文章"]
+        MemberOrders["我的訂單&lt;br/&gt;mock 訂單切換"]
+        MemberNotify["通知設定&lt;br/&gt;單一開關 / Apple 設定 mock"]
+    end
+
+    NavShell --&gt; TabPet
+    NavShell --&gt; TabDiscuss
+    NavShell --&gt; TabHome
+    NavShell --&gt; TabStore
+    NavShell --&gt; TabMember
+
+    TabHome --&gt; HomeMain
+    TabPet --&gt; PetHub
+    TabDiscuss --&gt; DiscussList
+    TabStore --&gt; Shop
+    TabMember --&gt; MemberGate
+
+    HomeMain --&gt; HomeTasks
+    HomeMain --&gt; HomeAI
+    HomeMain --&gt; HomeQuick
+    HomeMain --&gt; HomeCalendar
+    HomeMain --&gt; HomeContent
+    HomeMain --&gt; Construction
+    HomeTasks --&gt; PetProfile
+    HomeAI --&gt; AIChat
+    HomeQuick --&gt; PetList
+    HomeQuick --&gt; Record
+    HomeQuick --&gt; Plan
+    HomeQuick --&gt; Album
+    HomeCalendar --&gt; Calendar
+    HomeContent --&gt; Article
+    HomeContent --&gt; Product
+
+    PetHub --&gt; PetList
+    PetHub --&gt; Record
+    PetHub --&gt; Plan
+    PetHub --&gt; Album
+    PetList --&gt; AddPet
+    PetList --&gt; PetProfile
+    AddPet --&gt; PetList
+    PetProfile --&gt; EditPet
+    PetProfile --&gt; Record
+    PetProfile --&gt; Plan
+    PetProfile --&gt; Album
+    PetProfile --&gt; History
+    PetProfile --&gt; AIChat
+    EditPet --&gt; PetProfile
+    Record --&gt; PetProfile
+    Plan --&gt; Calendar
+    Album --&gt; PhotoDetail
+    PhotoDetail --&gt; Album
+
+    Calendar --&gt; CalendarFilter
+    Calendar --&gt; EventList
+    EventList --&gt; EventDetail
+    EventDetail --&gt; PetProfile
+    EventDetail --&gt; Record
+
+    AIChat -. "依開啟來源返回" .-&gt; HomeMain
+    AIChat -. "依開啟來源返回" .-&gt; PetProfile
+
+    DiscussList --&gt; Article
+    DiscussList --&gt; Editor
+    Article --&gt; Editor
+    Article --&gt; Comment
+    Editor --&gt; Article
+
+    Shop --&gt; Product
+    Shop --&gt; Cart
+    Product --&gt; Cart
+    Product --&gt; Checkout
+    Cart --&gt; Checkout
+    Checkout -. "mock alert，不切頁" .-&gt; Checkout
+
+    MemberGate --&gt; Login
+    Login --&gt; MemberGate
+    MemberGate --&gt; MemberProfile
+    MemberGate --&gt; MemberPets
+    MemberGate --&gt; MemberPosts
+    MemberGate --&gt; MemberOrders
+    MemberGate --&gt; MemberNotify
+
+    classDef nav fill:#263238,color:#ffffff,stroke:#263238,stroke-width:2px;
+    classDef home fill:#FFF7D6,stroke:#C88700,color:#2A2100,stroke-width:2px;
+    classDef pet fill:#E5F8EA,stroke:#238044,color:#0D2D1A,stroke-width:2px;
+    classDef support fill:#E7F0FF,stroke:#2D63B8,color:#102A4C,stroke-width:2px;
+    classDef discuss fill:#E3F8F8,stroke:#18878B,color:#0D3436,stroke-width:2px;
+    classDef store fill:#FFE7EC,stroke:#C23A5B,color:#40121D,stroke-width:2px;
+    classDef member fill:#F1E7FF,stroke:#7C3FC2,color:#2B1248,stroke-width:2px;
+
+    class NavShell,TabPet,TabDiscuss,TabHome,TabStore,TabMember nav;
+    class HomeMain,HomeTasks,HomeAI,HomeQuick,HomeCalendar,HomeContent,Construction home;
+    class PetHub,PetList,AddPet,PetProfile,EditPet,Record,Plan,Album,History,AIChat pet;
+    class Calendar,CalendarFilter,EventList,EventDetail,PhotoDetail support;
+    class DiscussList,Article,Editor,Comment discuss;
+    class Shop,Product,Cart,Checkout store;
+    class MemberGate,Login,MemberProfile,MemberPets,MemberPosts,MemberOrders,MemberNotify member;
+                        </div>
+                    </div>
+                    <p class="status">提示：點左側模組、節點或線會固定高亮；點其他目標才會切換或清除。</p>
+                </section>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

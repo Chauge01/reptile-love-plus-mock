@@ -182,3 +182,78 @@
 - Widget
   - 顯示提醒餵食
   - 顯示寵物已飼養幾天
+---
+
+## 10. 前端實作補齊 Sitemap（2026-04-26）
+> 依 `src/App.tsx` 目前可達路徑補齊。此 mock 沒有 URL router，以下為 screen state 層級。
+
+### 10.1 Bottom Nav
+1. 爬寵 `petHub`
+2. 討論 `discussion`
+3. 首頁 `home`
+4. 商店 `shop`
+5. 會員 `member`
+
+### 10.2 首頁 `home`
+- `home` -> `pets`
+- `home` -> `record`
+- `home` -> `plan`
+- `home` -> `discussion`
+- `home` -> `shop`
+- `home` -> `album`，預設篩選全部寵物
+- `home` -> `calendar`
+- `home` -> `ai`，返回目標為 `home`
+- `home` -> `article`
+- `home` -> `product`
+- `home` -> `construction`
+
+### 10.3 爬寵 `petHub`
+- `petHub` -> `pets`
+- `petHub` -> `record`
+- `petHub` -> `plan`
+- `petHub` -> `album`，預設篩選全部寵物
+- `pets` -> `profile`
+- `pets` -> `addPet`，由浮動按鈕進入
+- `addPet` -> save -> `pets`
+- `profile` -> `editPet`
+- `editPet` -> save -> `profile`
+- `profile` -> `record`
+- `profile` -> `plan`
+- `profile` -> `ai`，返回目標為 `profile`
+- `profile` -> `album`，預設篩選目前寵物
+- `profile` -> `history`
+- `record` -> submit -> `profile`
+- `plan` -> `calendar`
+- `calendar` -> `profile`
+- `calendar` -> `record`
+
+### 10.4 相簿 `album`
+- `album` 為首頁、爬寵 Hub、個體頁共用子頁。
+- `album` 可切換篩選寵物，不改變頁面層級。
+- `album` 點照片只開啟頁內放大檢視，不切換 screen。
+- `album` 更改照片歸屬只更新 mock data，不切換 screen。
+
+### 10.5 討論 `discussion`
+- `discussion` -> `article`
+- `discussion` -> `editor`，由發文浮動按鈕進入
+- `article` -> `editor`，僅自己的文章顯示編輯入口
+- `editor` publish -> `article`
+
+### 10.6 商店 `shop`
+- `shop` -> `product`
+- `shop` -> `cart`，由購物車浮動按鈕進入
+- `product` -> addToCart，停留商品頁
+- `product` -> buyNow -> `checkout`
+- `cart` -> `checkout`
+- `checkout` submit order，停留結帳頁並顯示 mock alert
+
+### 10.7 會員 `member`
+- `member` logged-out -> `login`
+- `login` login -> `member`
+- `member` logged-in 內部分頁切換不切換 screen：會員資料、我的爬寵、我的文章、我的訂單、通知設定。
+
+### 10.8 返回規則
+- 一般子頁返回上一個 screen。
+- Bottom Nav 切換會清空返回堆疊。
+- `ai` 會依開啟來源保留 fallback 返回目標。
+- 多數子頁支援左側滑動返回，互動條件為起點靠左、右滑足夠距離且垂直位移不大。
