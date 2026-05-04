@@ -11,10 +11,10 @@
 
 ## 3. 已更新的清單檔案
 - `00_目前最高優先規則.md`
-- `01_Sitemap_零腦補版.md`
-- `02_Module_Function_List_零腦補版.md`
-- `03_Screen_List_零腦補版.md`
-- `04_每頁_Block_List_零腦補版.md`
+- `01_Sitemap.md`
+- `02_Module_Function_List.md`
+- `03_Screen_List.md`
+- `04_每頁_Block_List.md`
 - `05_Localhost_與備註.md`
 - `06_Mock_Data_一個月樣本.md`
 

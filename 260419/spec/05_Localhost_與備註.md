@@ -8,10 +8,10 @@
 - `http://localhost:5182/`
 
 ## 3. 已更新的清單檔案
-- `01_Sitemap_零腦補版.md`
-- `02_Module_Function_List_零腦補版.md`
-- `03_Screen_List_零腦補版.md`
-- `04_每頁_Block_List_零腦補版.md`
+- `01_Sitemap.md`
+- `02_Module_Function_List.md`
+- `03_Screen_List.md`
+- `04_每頁_Block_List.md`
 - `06_Mock_Data_一個月樣本.md`
 
 ## 4. 目前最優先核心功能

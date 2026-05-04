@@ -1,0 +1,767 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reptile Love+ IA Flow Chart</title>
+    <style>
+        :root {
+            --bg: #edf0f3;
+            --panel: #ffffff;
+            --text: #18212f;
+            --muted: #667085;
+            --line: #cfd7e3;
+            --accent: #f97316;
+            --accent-strong: #c2410c;
+            --shadow: 0 18px 48px rgba(15, 23, 42, 0.14);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, "Helvetica Neue", sans-serif;
+        }
+
+        main {
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 18px;
+            align-items: center;
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(14px);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 0;
+        }
+
+        .meta {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        button {
+            min-width: 38px;
+            min-height: 34px;
+            border: 1px solid #b9c3d0;
+            border-radius: 6px;
+            background: #fff;
+            color: #1f2937;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        button:hover,
+        button.active {
+            border-color: var(--accent);
+            color: var(--accent-strong);
+            background: #fff7ed;
+        }
+
+        .primary {
+            min-width: 76px;
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .primary:hover {
+            background: var(--accent-strong);
+            color: #fff;
+        }
+
+        .zoom-readout {
+            min-width: 58px;
+            text-align: center;
+            color: #475467;
+            font-size: 13px;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 270px 1fr;
+            min-height: 0;
+        }
+
+        aside {
+            border-right: 1px solid var(--line);
+            background: #f8fafc;
+            padding: 18px;
+            overflow: auto;
+        }
+
+        .side-title {
+            margin: 0 0 10px;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .focus-list,
+        .legend {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .focus-list button {
+            width: 100%;
+            height: auto;
+            min-height: 36px;
+            padding: 8px 10px;
+            text-align: left;
+            border-radius: 7px;
+            line-height: 1.35;
+        }
+
+        .pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #475467;
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            flex: 0 0 auto;
+            border-radius: 3px;
+            border: 1px solid rgba(0, 0, 0, 0.18);
+        }
+
+        .dot.nav { background: #263238; }
+        .dot.home { background: #fff7d6; }
+        .dot.pet { background: #e5f8ea; }
+        .dot.support { background: #e7f0ff; }
+        .dot.discuss { background: #e3f8f8; }
+        .dot.store { background: #ffe7ec; }
+        .dot.member { background: #f1e7ff; }
+
+        .note {
+            margin: 0 0 14px;
+            color: #667085;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .check {
+            margin: 0;
+            padding: 12px;
+            border: 1px solid #d6e1ef;
+            border-radius: 8px;
+            background: #fff;
+            color: #344054;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .canvas-shell {
+            min-width: 0;
+            min-height: 0;
+            padding: 18px;
+        }
+
+        .canvas {
+            position: relative;
+            height: calc(100vh - 92px);
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background:
+                linear-gradient(#edf2f7 1px, transparent 1px),
+                linear-gradient(90deg, #edf2f7 1px, transparent 1px),
+                #fff;
+            background-size: 24px 24px;
+            box-shadow: var(--shadow);
+            cursor: grab;
+        }
+
+        .canvas.dragging {
+            cursor: grabbing;
+            user-select: none;
+        }
+
+        .stage {
+            width: max-content;
+            min-width: 100%;
+            padding: 30px;
+            transform-origin: top left;
+        }
+
+        .mermaid {
+            width: max-content;
+            min-width: 1800px;
+        }
+
+        /* English IA readability overrides */
+        .mermaid svg .nodeLabel,
+        .mermaid svg .edgeLabel {
+            line-height: 1.35 !important;
+            white-space: normal !important;
+        }
+
+        .mermaid svg .label foreignObject {
+            overflow: visible;
+        }
+
+        .status {
+            position: sticky;
+            left: 14px;
+            bottom: 14px;
+            z-index: 12;
+            width: fit-content;
+            max-width: 520px;
+            margin: 0 0 14px 14px;
+            padding: 9px 12px;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            background: rgba(255, 247, 237, 0.96);
+            color: #7c2d12;
+            font-size: 12px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+        }
+
+        .mermaid svg .node,
+        .mermaid svg .flowchart-link {
+            cursor: pointer;
+            transition: opacity 140ms ease, stroke 140ms ease, stroke-width 140ms ease, filter 140ms ease;
+        }
+
+        .mermaid svg .node.diagram-dim,
+        .mermaid svg .flowchart-link.diagram-dim,
+        .mermaid svg .cluster.diagram-dim {
+            opacity: 0.16;
+        }
+
+        .mermaid svg .node.node-active rect,
+        .mermaid svg .node.node-active polygon,
+        .mermaid svg .node.node-active circle,
+        .mermaid svg .node.node-active ellipse,
+        .mermaid svg .node.node-active path {
+            stroke: var(--accent) !important;
+            stroke-width: 4px !important;
+            filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.42));
+        }
+
+        .mermaid svg .node.node-neighbor rect,
+        .mermaid svg .node.node-neighbor polygon,
+        .mermaid svg .node.node-neighbor circle,
+        .mermaid svg .node.node-neighbor ellipse,
+        .mermaid svg .node.node-neighbor path {
+            stroke: #0ea5e9 !important;
+            stroke-width: 3px !important;
+            filter: drop-shadow(0 0 8px rgba(14, 165, 233, 0.34));
+        }
+
+        .mermaid svg .flowchart-link.link-active {
+            opacity: 1 !important;
+            stroke: var(--accent) !important;
+            stroke-width: 4px !important;
+            filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.55));
+        }
+
+        @media (max-width: 960px) {
+            header { grid-template-columns: 1fr; align-items: start; }
+            .workspace { grid-template-columns: 1fr; }
+            aside {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+                max-height: 260px;
+            }
+            .canvas { height: calc(100vh - 342px); }
+        }
+    </style>
+    <script type="module">
+        import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: "base",
+            flowchart: {
+                curve: "basis",
+                nodeSpacing: 78,
+                rankSpacing: 128,
+                padding: 18,
+                useMaxWidth: false
+            },
+            themeVariables: {
+                fontFamily: "Arial, Helvetica Neue, sans-serif",
+                fontSize: "13px",
+                primaryColor: "#ffffff",
+                primaryTextColor: "#18212f",
+                primaryBorderColor: "#94a3b8",
+                lineColor: "#64748b",
+                clusterBkg: "#f8fafc",
+                clusterBorder: "#b6c2d2",
+                edgeLabelBackground: "#ffffff"
+            }
+        });
+
+        const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+        const nodeIdFromElement = (node) => node.id?.replace(/^flowchart-/, "").replace(/-\d+$/, "");
+        const edgeEnds = (edge) => {
+            const classes = [...edge.classList];
+            const classSource = classes.find((item) => item.startsWith("LS-"))?.slice(3);
+            const classTarget = classes.find((item) => item.startsWith("LE-"))?.slice(3);
+            if (classSource || classTarget) return { source: classSource, target: classTarget };
+            const rawId = edge.dataset.id || edge.id || "";
+            const match = rawId.match(/L_(.+)_(.+)_\d+$/);
+            return match ? { source: match[1], target: match[2] } : {};
+        };
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const canvas = document.querySelector(".canvas");
+            const stage = document.querySelector(".stage");
+            const readout = document.querySelector(".zoom-readout");
+            const status = document.querySelector(".status");
+            let zoom = 1;
+
+            const applyZoom = () => {
+                stage.style.transform = `scale(${zoom})`;
+                stage.style.marginRight = `${Math.max(0, stage.scrollWidth * (zoom - 1))}px`;
+                stage.style.marginBottom = `${Math.max(0, stage.scrollHeight * (zoom - 1))}px`;
+                readout.textContent = `${Math.round(zoom * 100)}%`;
+            };
+
+            const setZoom = (next) => {
+                zoom = clamp(next, 0.35, 2.3);
+                applyZoom();
+            };
+
+            document.querySelector("[data-zoom='in']").addEventListener("click", () => setZoom(zoom + 0.15));
+            document.querySelector("[data-zoom='out']").addEventListener("click", () => setZoom(zoom - 0.15));
+            document.querySelector("[data-zoom='reset']").addEventListener("click", () => setZoom(1));
+            document.querySelector("[data-zoom='fit']").addEventListener("click", () => {
+                const svg = stage.querySelector("svg");
+                if (!svg) return;
+                const next = ((canvas.clientWidth - 76) / svg.getBoundingClientRect().width) * zoom;
+                setZoom(next);
+                canvas.scrollTo({ left: 0, top: 0, behavior: "smooth" });
+            });
+
+            canvas.addEventListener("wheel", (event) => {
+                if (!event.ctrlKey && !event.metaKey) return;
+                event.preventDefault();
+                setZoom(zoom + (event.deltaY < 0 ? 0.08 : -0.08));
+            }, { passive: false });
+
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            let scrollLeft = 0;
+            let scrollTop = 0;
+
+            canvas.addEventListener("pointerdown", (event) => {
+                if (event.target.closest(".node") || event.target.closest(".flowchart-link")) return;
+                isDragging = true;
+                canvas.classList.add("dragging");
+                canvas.setPointerCapture(event.pointerId);
+                startX = event.clientX;
+                startY = event.clientY;
+                scrollLeft = canvas.scrollLeft;
+                scrollTop = canvas.scrollTop;
+            });
+
+            canvas.addEventListener("pointermove", (event) => {
+                if (!isDragging) return;
+                canvas.scrollLeft = scrollLeft - (event.clientX - startX);
+                canvas.scrollTop = scrollTop - (event.clientY - startY);
+            });
+
+            const stopDrag = () => {
+                isDragging = false;
+                canvas.classList.remove("dragging");
+            };
+
+            canvas.addEventListener("pointerup", stopDrag);
+            canvas.addEventListener("pointercancel", stopDrag);
+
+            const setupSpotlight = () => {
+                const svg = stage.querySelector("svg");
+                if (!svg) return false;
+
+                const nodes = [...svg.querySelectorAll(".node")];
+                const edges = [...svg.querySelectorAll(".flowchart-link")];
+                const clusters = [...svg.querySelectorAll(".cluster")];
+                const nodeById = new Map(nodes.map((node) => [nodeIdFromElement(node), node]));
+
+                const clear = () => {
+                    nodes.forEach((node) => node.classList.remove("diagram-dim", "node-active", "node-neighbor"));
+                    edges.forEach((edge) => edge.classList.remove("diagram-dim", "link-active"));
+                    clusters.forEach((cluster) => cluster.classList.remove("diagram-dim"));
+                    document.querySelectorAll("[data-focus]").forEach((button) => button.classList.remove("active"));
+                    status.textContent = "Tip: click a module, node, or link to keep it highlighted. Click another target to switch or clear.";
+                };
+
+                const applySpotlight = ({ activeNodeIds, neighborNodeIds = [], activeEdges = [], label }) => {
+                    const visible = new Set([...activeNodeIds, ...neighborNodeIds]);
+                    document.querySelectorAll("[data-focus]").forEach((button) => button.classList.remove("active"));
+                    nodes.forEach((node) => {
+                        const nodeId = nodeIdFromElement(node);
+                        node.classList.toggle("diagram-dim", !visible.has(nodeId));
+                        node.classList.toggle("node-active", activeNodeIds.has(nodeId));
+                        node.classList.toggle("node-neighbor", neighborNodeIds.includes(nodeId));
+                    });
+                    edges.forEach((edge) => {
+                        const isActive = activeEdges.includes(edge);
+                        edge.classList.toggle("diagram-dim", !isActive);
+                        edge.classList.toggle("link-active", isActive);
+                    });
+                    clusters.forEach((cluster) => cluster.classList.add("diagram-dim"));
+                    status.textContent = label;
+                };
+
+                const applyNodeFocus = (id) => {
+                    const activeEdges = [];
+                    const neighborNodeIds = [];
+                    edges.forEach((edge) => {
+                        const { source, target } = edgeEnds(edge);
+                        if (source === id || target === id) {
+                            if (source && source !== id) neighborNodeIds.push(source);
+                            if (target && target !== id) neighborNodeIds.push(target);
+                            activeEdges.push(edge);
+                        }
+                    });
+                    applySpotlight({
+                        activeNodeIds: new Set([id]),
+                        neighborNodeIds,
+                        activeEdges,
+                        label: `Focused node: ${nodeById.get(id)?.textContent?.trim() ?? id}`
+                    });
+                };
+
+                const applyEdgeFocus = (edge) => {
+                    const { source, target } = edgeEnds(edge);
+                    const activeNodeIds = new Set([source, target].filter(Boolean));
+                    const sourceText = nodeById.get(source)?.textContent?.trim() ?? source;
+                    const targetText = nodeById.get(target)?.textContent?.trim() ?? target;
+                    applySpotlight({
+                        activeNodeIds,
+                        activeEdges: [edge],
+                        label: `Focused link: ${sourceText} -> ${targetText}`
+                    });
+                };
+
+                const applyModuleFocus = (ids, label) => {
+                    const allowed = new Set(ids);
+                    document.querySelectorAll("[data-focus]").forEach((button) => button.classList.remove("active"));
+                    nodes.forEach((node) => {
+                        const id = nodeIdFromElement(node);
+                        node.classList.toggle("diagram-dim", !allowed.has(id));
+                        node.classList.toggle("node-active", allowed.has(id));
+                        node.classList.remove("node-neighbor");
+                    });
+                    edges.forEach((edge) => {
+                        const { source, target } = edgeEnds(edge);
+                        const isActive = allowed.has(source) && allowed.has(target);
+                        edge.classList.toggle("diagram-dim", !isActive);
+                        edge.classList.toggle("link-active", isActive);
+                    });
+                    clusters.forEach((cluster) => cluster.classList.add("diagram-dim"));
+                    status.textContent = `Focused module: ${label}`;
+                };
+
+                nodes.forEach((node) => {
+                    const id = nodeIdFromElement(node);
+                    node.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        applyNodeFocus(id);
+                    });
+                    node.setAttribute("tabindex", "0");
+                });
+
+                edges.forEach((edge) => {
+                    edge.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        applyEdgeFocus(edge);
+                    });
+                });
+
+                svg.addEventListener("click", (event) => {
+                    if (event.target.closest(".node") || event.target.closest(".flowchart-link")) return;
+                    clear();
+                });
+
+                const focusGroups = {
+                    all: [],
+                    home: ["HomeMain", "HomeTasks", "HomeAI", "HomeQuick", "HomeCalendar", "HomeContent", "Construction"],
+                    pet: ["PetHub", "PetList", "AddPet", "PetProfile", "EditPet", "Record", "Plan", "Album", "History", "AIChat"],
+                    support: ["Calendar", "CalendarFilter", "EventList", "EventDetail", "PhotoDetail"],
+                    discuss: ["DiscussList", "Article", "Editor", "Comment"],
+                    store: ["Shop", "Product", "Cart", "Checkout"],
+                    member: ["MemberGate", "Login", "MemberProfile", "MemberPets", "MemberPosts", "MemberOrders", "MemberNotify"]
+                };
+
+                document.querySelectorAll("[data-focus]").forEach((button) => {
+                    button.addEventListener("click", () => {
+                        const key = button.dataset.focus;
+                        if (key === "all") {
+                            clear();
+                            button.classList.add("active");
+                            return;
+                        }
+                        applyModuleFocus(focusGroups[key] ?? [], button.textContent.trim());
+                        button.classList.add("active");
+                    });
+                });
+
+                clear();
+                return true;
+            };
+
+            const waitForDiagram = () => {
+                if (setupSpotlight()) {
+                    setTimeout(() => document.querySelector("[data-zoom='fit']").click(), 120);
+                    return;
+                }
+                setTimeout(waitForDiagram, 120);
+            };
+
+            waitForDiagram();
+        });
+    </script>
+</head>
+<body>
+    <main>
+        <header>
+            <div>
+                <h1>Reptile Love+ IA Flow Chart</h1>
+                <p class="meta">Aligned with the English spec documents and `src/App.tsx`. Start with module focus, then click nodes or links to inspect upstream and downstream flow.</p>
+            </div>
+            <div class="toolbar" aria-label="Zoom toolbar">
+                <button type="button" data-zoom="out" title="Zoom out">-</button>
+                <span class="zoom-readout">100%</span>
+                <button type="button" data-zoom="in" title="Zoom in">+</button>
+                <button type="button" data-zoom="reset" title="Reset to 100%">100%</button>
+                <button type="button" class="primary" data-zoom="fit" title="Fit to window">Fit</button>
+            </div>
+        </header>
+
+        <section class="workspace">
+            <aside>
+                <p class="side-title">Module Focus</p>
+                <div class="focus-list">
+                    <button type="button" data-focus="all">Show All</button>
+                    <button type="button" data-focus="home">Home</button>
+                    <button type="button" data-focus="pet">Reptiles Core</button>
+                    <button type="button" data-focus="support">Support Tools: Calendar / Photo / AI</button>
+                    <button type="button" data-focus="discuss">Discussion</button>
+                    <button type="button" data-focus="store">Shop</button>
+                    <button type="button" data-focus="member">Member</button>
+                </div>
+
+                <p class="side-title">Legend</p>
+                <div class="legend">
+                    <span class="pill"><span class="dot nav"></span>Global Navigation / Shell</span>
+                    <span class="pill"><span class="dot home"></span>Home Entry</span>
+                    <span class="pill"><span class="dot pet"></span>Reptiles Core</span>
+                    <span class="pill"><span class="dot support"></span>Support Tools</span>
+                    <span class="pill"><span class="dot discuss"></span>Discussion</span>
+                    <span class="pill"><span class="dot store"></span>Shop</span>
+                    <span class="pill"><span class="dot member"></span>Member</span>
+                </div>
+
+                <p class="note">Controls: click a module, node, or link to keep it highlighted. Click another node / link to switch. Click Show All or blank canvas to clear. Use Ctrl + wheel to zoom, and drag blank canvas to pan.</p>
+                <p class="check">IA check: Order Completion was removed because the current frontend stays on Checkout and shows a mock alert. Pet Notes is represented as Pet Profile. Comments, enlarged photo preview, and Member tabs remain as in-page interactions.</p>
+            </aside>
+
+            <div class="canvas-shell">
+                <section class="canvas" aria-label="IA flow chart canvas">
+                    <div class="stage">
+                        <div class="mermaid">
+flowchart LR
+    subgraph NAV["Fixed Bottom Navigation / Global Shell"]
+        direction TB
+        NavShell["Phone Mock Shell&lt;br/&gt;TopBar / Content&lt;br/&gt;FAB / BottomNav"]
+        TabPet["Reptiles"]
+        TabDiscuss["Discussion"]
+        TabHome["Home"]
+        TabStore["Shop"]
+        TabMember["Member"]
+    end
+
+    subgraph HOME["Home: Entry Overview"]
+        direction TB
+        HomeMain["Home Main Screen&lt;br/&gt;Long Scrollable Page"]
+        HomeTasks["Today Widget&lt;br/&gt;Today Tasks&lt;br/&gt;7-Day Upcoming"]
+        HomeAI["Pet AI+ Assistant&lt;br/&gt;Returns to Home"]
+        HomeQuick["Shortcut Entries&lt;br/&gt;My Reptiles / Records&lt;br/&gt;Plan / Album"]
+        HomeCalendar["Calendar Block&lt;br/&gt;Red: Feeding&lt;br/&gt;Blue: Other"]
+        HomeContent["Content Preview&lt;br/&gt;Articles / Products"]
+        Construction["Construction Screen&lt;br/&gt;Mock Placeholder"]
+    end
+
+    subgraph PET["Reptiles Core"]
+        direction TB
+        PetHub["Reptiles Hub&lt;br/&gt;Core Feature Entries"]
+        PetList["My Reptiles List&lt;br/&gt;Cards Open Profile"]
+        AddPet["Add Reptile&lt;br/&gt;Save to List"]
+        PetProfile["Pet Profile&lt;br/&gt;Data / Charts&lt;br/&gt;Timeline / Photos"]
+        EditPet["Edit Reptile&lt;br/&gt;Save to Profile"]
+        Record["Feeding / Records&lt;br/&gt;Species Template&lt;br/&gt;Custom Tags"]
+        Plan["Feeding Plan&lt;br/&gt;List / Settings&lt;br/&gt;Create / Edit"]
+        Album["Reptile Album&lt;br/&gt;All / Selected Filter"]
+        History["History Records&lt;br/&gt;Abnormal / Photo Badges"]
+        AIChat["Pet AI+ Chat&lt;br/&gt;Switch Reptile&lt;br/&gt;Mock Input"]
+    end
+
+    subgraph SUPPORT["Support Tools: Calendar / Photo / AI"]
+        direction TB
+        Calendar["Calendar Page&lt;br/&gt;Full Monthly Calendar"]
+        CalendarFilter["Filters&lt;br/&gt;Reptile / Event Type"]
+        EventList["Selected-Date Event List"]
+        EventDetail["Event Details&lt;br/&gt;Go to Profile / Records"]
+        PhotoDetail["Photo Preview&lt;br/&gt;Reassign to Reptile"]
+    end
+
+    subgraph DISCUSS["Discussion"]
+        direction TB
+        DiscussList["Discussion List&lt;br/&gt;Cards / Likes / Replies"]
+        Article["Article Detail&lt;br/&gt;Content / Images&lt;br/&gt;Comments"]
+        Editor["Post Editor&lt;br/&gt;Add / Edit Shared"]
+        Comment["Comments&lt;br/&gt;Validate / Pin New"]
+    end
+
+    subgraph STORE["Shop"]
+        direction TB
+        Shop["Shop List&lt;br/&gt;Product Cards&lt;br/&gt;Add to Cart"]
+        Product["Product Detail&lt;br/&gt;Specs / Stock&lt;br/&gt;Shipping"]
+        Cart["Cart&lt;br/&gt;Quantity / Total"]
+        Checkout["Checkout&lt;br/&gt;Recipient / Notes&lt;br/&gt;Mock Submit"]
+    end
+
+    subgraph MEMBER["Member"]
+        direction TB
+        MemberGate["Member Page&lt;br/&gt;Logged-Out Guide&lt;br/&gt;Logged-In Tabs"]
+        Login["Login / Register&lt;br/&gt;Email / Password&lt;br/&gt;OAuth Mock"]
+        MemberProfile["My Profile&lt;br/&gt;Name / Email"]
+        MemberPets["My Reptiles Summary"]
+        MemberPosts["My Articles"]
+        MemberOrders["My Orders&lt;br/&gt;Mock Order Switch"]
+        MemberNotify["Notification Settings&lt;br/&gt;Single Toggle&lt;br/&gt;Apple Settings Mock"]
+    end
+
+    NavShell --> TabPet
+    NavShell --> TabDiscuss
+    NavShell --> TabHome
+    NavShell --> TabStore
+    NavShell --> TabMember
+    TabHome --> HomeMain
+    TabPet --> PetHub
+    TabDiscuss --> DiscussList
+    TabStore --> Shop
+    TabMember --> MemberGate
+    HomeMain --> HomeTasks
+    HomeMain --> HomeAI
+    HomeMain --> HomeQuick
+    HomeMain --> HomeCalendar
+    HomeMain --> HomeContent
+    HomeMain --> Construction
+    HomeTasks --> PetProfile
+    HomeAI --> AIChat
+    HomeQuick --> PetList
+    HomeQuick --> Record
+    HomeQuick --> Plan
+    HomeQuick --> Album
+    HomeCalendar --> Calendar
+    HomeContent --> Article
+    HomeContent --> Product
+    PetHub --> PetList
+    PetHub --> Record
+    PetHub --> Plan
+    PetHub --> Album
+    PetList --> AddPet
+    PetList --> PetProfile
+    AddPet --> PetList
+    PetProfile --> EditPet
+    PetProfile --> Record
+    PetProfile --> Plan
+    PetProfile --> Album
+    PetProfile --> History
+    PetProfile --> AIChat
+    EditPet --> PetProfile
+    Record --> PetProfile
+    Plan --> Calendar
+    Album --> PhotoDetail
+    PhotoDetail --> Album
+    Calendar --> CalendarFilter
+    Calendar --> EventList
+    EventList --> EventDetail
+    EventDetail --> PetProfile
+    EventDetail --> Record
+    AIChat -. "Return by entry source" .-> HomeMain
+    AIChat -. "Return by entry source" .-> PetProfile
+    DiscussList --> Article
+    DiscussList --> Editor
+    Article --> Editor
+    Article --> Comment
+    Editor --> Article
+    Shop --> Product
+    Shop --> Cart
+    Product --> Cart
+    Product --> Checkout
+    Cart --> Checkout
+    Checkout -. "Mock alert; no page change" .-> Checkout
+    MemberGate --> Login
+    Login --> MemberGate
+    MemberGate --> MemberProfile
+    MemberGate --> MemberPets
+    MemberGate --> MemberPosts
+    MemberGate --> MemberOrders
+    MemberGate --> MemberNotify
+
+    classDef nav fill:#263238,color:#ffffff,stroke:#263238,stroke-width:2px;
+    classDef home fill:#FFF7D6,stroke:#C88700,color:#2A2100,stroke-width:2px;
+    classDef pet fill:#E5F8EA,stroke:#238044,color:#0D2D1A,stroke-width:2px;
+    classDef support fill:#E7F0FF,stroke:#2D63B8,color:#102A4C,stroke-width:2px;
+    classDef discuss fill:#E3F8F8,stroke:#18878B,color:#0D3436,stroke-width:2px;
+    classDef store fill:#FFE7EC,stroke:#C23A5B,color:#40121D,stroke-width:2px;
+    classDef member fill:#F1E7FF,stroke:#7C3FC2,color:#2B1248,stroke-width:2px;
+    class NavShell,TabPet,TabDiscuss,TabHome,TabStore,TabMember nav;
+    class HomeMain,HomeTasks,HomeAI,HomeQuick,HomeCalendar,HomeContent,Construction home;
+    class PetHub,PetList,AddPet,PetProfile,EditPet,Record,Plan,Album,History,AIChat pet;
+    class Calendar,CalendarFilter,EventList,EventDetail,PhotoDetail support;
+    class DiscussList,Article,Editor,Comment discuss;
+    class Shop,Product,Cart,Checkout store;
+    class MemberGate,Login,MemberProfile,MemberPets,MemberPosts,MemberOrders,MemberNotify member;
+                        </div>
+                    </div>
+                    <p class="status">Tip: click a module, node, or link to keep it highlighted. Click another target to switch or clear.</p>
+                </section>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
+
+

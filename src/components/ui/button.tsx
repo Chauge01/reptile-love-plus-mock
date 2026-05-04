@@ -64,4 +64,6 @@ function Button({
   )
 }
 
+// Shared by generated UI code; keep this colocated with Button for now.
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants }
