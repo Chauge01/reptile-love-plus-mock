@@ -1,0 +1,167 @@
+flowchart LR
+    %% Reptile Love+ IA - Designer Review Version
+
+    subgraph NAV["Fixed Bottom Navigation / Global Shell"]
+        direction TB
+        NavShell["Phone Mock Shell<br/>TopBar / Content<br/>FAB / BottomNav"]
+        TabPet["Reptiles"]
+        TabDiscuss["Discussion"]
+        TabHome["Home"]
+        TabStore["Shop"]
+        TabMember["Member"]
+    end
+
+    subgraph HOME["Home: Entry Overview"]
+        direction TB
+        HomeMain["Home Main Screen<br/>Long Scrollable Page"]
+        HomeTasks["Today Widget<br/>Today Tasks<br/>7-Day Upcoming"]
+        HomeAI["Pet AI+ Assistant<br/>Returns to Home"]
+        HomeQuick["Shortcut Entries<br/>My Reptiles / Records<br/>Plan / Album"]
+        HomeCalendar["Calendar Block<br/>Red: Feeding<br/>Blue: Other"]
+        HomeContent["Content Preview<br/>Articles / Products"]
+        Construction["Construction Screen<br/>Mock Placeholder"]
+    end
+
+    subgraph PET["Reptiles Core"]
+        direction TB
+        PetHub["Reptiles Hub<br/>Core Feature Entries"]
+        PetList["My Reptiles List<br/>Cards Open Profile"]
+        AddPet["Add Reptile<br/>Save to List"]
+        PetProfile["Pet Profile<br/>Data / Charts<br/>Timeline / Photos"]
+        EditPet["Edit Reptile<br/>Save to Profile"]
+        Record["Feeding / Records<br/>Species Template<br/>Custom Tags"]
+        Plan["Feeding Plan<br/>List / Settings<br/>Create / Edit"]
+        Album["Reptile Album<br/>All / Selected Filter"]
+        History["History Records<br/>Abnormal / Photo Badges"]
+        AIChat["Pet AI+ Chat<br/>Switch Reptile<br/>Mock Input"]
+    end
+
+    subgraph SUPPORT["Support Tools: Calendar / Photo / AI"]
+        direction TB
+        Calendar["Calendar Page<br/>Full Monthly Calendar"]
+        CalendarFilter["Filters<br/>Reptile / Event Type"]
+        EventList["Selected-Date Event List"]
+        EventDetail["Event Details<br/>Go to Profile / Records"]
+        PhotoDetail["Photo Preview<br/>Reassign to Reptile"]
+    end
+
+    subgraph DISCUSS["Discussion"]
+        direction TB
+        DiscussList["Discussion List<br/>Cards / Likes / Replies"]
+        Article["Article Detail<br/>Content / Images<br/>Comments"]
+        Editor["Post Editor<br/>Add / Edit Shared"]
+        Comment["Comments<br/>Validate / Pin New"]
+    end
+
+    subgraph STORE["Shop"]
+        direction TB
+        Shop["Shop List<br/>Product Cards<br/>Add to Cart"]
+        Product["Product Detail<br/>Specs / Stock<br/>Shipping"]
+        Cart["Cart<br/>Quantity / Total"]
+        Checkout["Checkout<br/>Recipient / Notes<br/>Mock Submit"]
+    end
+
+    subgraph MEMBER["Member"]
+        direction TB
+        MemberGate["Member Page<br/>Logged-Out Guide<br/>Logged-In Tabs"]
+        Login["Login / Register<br/>Email / Password<br/>OAuth Mock"]
+        MemberProfile["My Profile<br/>Name / Email"]
+        MemberPets["My Reptiles Summary"]
+        MemberPosts["My Articles"]
+        MemberOrders["My Orders<br/>Mock Order Switch"]
+        MemberNotify["Notification Settings<br/>Single Toggle<br/>Apple Settings Mock"]
+    end
+
+    NavShell --> TabPet
+    NavShell --> TabDiscuss
+    NavShell --> TabHome
+    NavShell --> TabStore
+    NavShell --> TabMember
+
+    TabHome --> HomeMain
+    TabPet --> PetHub
+    TabDiscuss --> DiscussList
+    TabStore --> Shop
+    TabMember --> MemberGate
+
+    HomeMain --> HomeTasks
+    HomeMain --> HomeAI
+    HomeMain --> HomeQuick
+    HomeMain --> HomeCalendar
+    HomeMain --> HomeContent
+    HomeMain --> Construction
+    HomeTasks --> PetProfile
+    HomeAI --> AIChat
+    HomeQuick --> PetList
+    HomeQuick --> Record
+    HomeQuick --> Plan
+    HomeQuick --> Album
+    HomeCalendar --> Calendar
+    HomeContent --> Article
+    HomeContent --> Product
+
+    PetHub --> PetList
+    PetHub --> Record
+    PetHub --> Plan
+    PetHub --> Album
+    PetList --> AddPet
+    PetList --> PetProfile
+    AddPet --> PetList
+    PetProfile --> EditPet
+    PetProfile --> Record
+    PetProfile --> Plan
+    PetProfile --> Album
+    PetProfile --> History
+    PetProfile --> AIChat
+    EditPet --> PetProfile
+    Record --> PetProfile
+    Plan --> Calendar
+    Album --> PhotoDetail
+    PhotoDetail --> Album
+
+    Calendar --> CalendarFilter
+    Calendar --> EventList
+    EventList --> EventDetail
+    EventDetail --> PetProfile
+    EventDetail --> Record
+
+    AIChat -. "Return by entry source" .-> HomeMain
+    AIChat -. "Return by entry source" .-> PetProfile
+
+    DiscussList --> Article
+    DiscussList --> Editor
+    Article --> Editor
+    Article --> Comment
+    Editor --> Article
+
+    Shop --> Product
+    Shop --> Cart
+    Product --> Cart
+    Product --> Checkout
+    Cart --> Checkout
+    Checkout -. "Mock alert; no page change" .-> Checkout
+
+    MemberGate --> Login
+    Login --> MemberGate
+    MemberGate --> MemberProfile
+    MemberGate --> MemberPets
+    MemberGate --> MemberPosts
+    MemberGate --> MemberOrders
+    MemberGate --> MemberNotify
+
+    classDef nav fill:#263238,color:#ffffff,stroke:#263238,stroke-width:2px;
+    classDef home fill:#FFF7D6,stroke:#C88700,color:#2A2100,stroke-width:2px;
+    classDef pet fill:#E5F8EA,stroke:#238044,color:#0D2D1A,stroke-width:2px;
+    classDef support fill:#E7F0FF,stroke:#2D63B8,color:#102A4C,stroke-width:2px;
+    classDef discuss fill:#E3F8F8,stroke:#18878B,color:#0D3436,stroke-width:2px;
+    classDef store fill:#FFE7EC,stroke:#C23A5B,color:#40121D,stroke-width:2px;
+    classDef member fill:#F1E7FF,stroke:#7C3FC2,color:#2B1248,stroke-width:2px;
+
+    class NavShell,TabPet,TabDiscuss,TabHome,TabStore,TabMember nav;
+    class HomeMain,HomeTasks,HomeAI,HomeQuick,HomeCalendar,HomeContent,Construction home;
+    class PetHub,PetList,AddPet,PetProfile,EditPet,Record,Plan,Album,History,AIChat pet;
+    class Calendar,CalendarFilter,EventList,EventDetail,PhotoDetail support;
+    class DiscussList,Article,Editor,Comment discuss;
+    class Shop,Product,Cart,Checkout store;
+    class MemberGate,Login,MemberProfile,MemberPets,MemberPosts,MemberOrders,MemberNotify member;
+
